@@ -85,15 +85,9 @@ def delete_task(task_id):
         })
     else:
         return jsonify({"msg": "could not find task id"}),404
-# @app.route("/tasks/<int:task_id>", methods=['GET'])
-# def get_specific_task():
-#     return {"msg": "task_id"}
 
 # # DELETE /tasks/{task_id} Tar bort en task med ett specifikt id.
 
-     
-    
-    #return jsonify({"msg": "Task deleted"})
 
 # # PUT /tasks/{task_id} Uppdaterar en task med ett specifikt id.
 
