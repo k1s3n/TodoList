@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, url_for,jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from datetime import datetime
 from flask_migrate import Migrate
 
@@ -43,14 +44,30 @@ def get_tasks():
     tasks = Todo.query.all()
     if not tasks:
         return jsonify({"msg": "No task found."}), 404
-    task_list = [task.as_dict() for task in tasks]
+    task_list = []
+    for task in tasks:
+        task_list.append(task.as_dict())
     return jsonify(task_list)
 
-# #POST /tasks Lägger till en ny task. Tasken är ofärdig när den först läggs till.
 
-# @app.route("/tasks", methods=['POST'])
-# def add_task():
-#     return "create task"
+# #POST /tasks Lägger till en ny task. Tasken är ofärdig när den först läggs till.
+@app.route("/tasks", methods=['POST'])
+def add_task():
+    data = request.json
+    content = data.get("content")
+    completed = data.get("completed", False)
+    categories = data.get("categories")
+    
+    if not data.get("content"):
+        return jsonify({"msg": "You have write in content"})
+    elif not data.get("categories"):
+        return jsonify({"msg": "You have write in categories"})
+    else:    
+        new_task = Todo(categories=categories, completed=completed, content=content)
+        db.session.add(new_task)
+        db.session.commit()
+    
+    return jsonify({"msg": "Task added! "})
 
 # # GET /tasks/{task_id} Hämtar en task med ett specifikt id.
 
