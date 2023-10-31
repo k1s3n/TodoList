@@ -17,7 +17,8 @@ class Todo(db.Model):
     completed = db.Column(db.Boolean, default=False)
     categories = db.Column(db.String(200), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
-
+    
+     
     def as_dict(self):
         
         task_dict = {}
@@ -39,8 +40,7 @@ def home():
 
 # #backend
 
-# #GET /tasks Hämtar alla tasks. För VG: lägg till en parameter completed som kan filtrera på färdiga eller ofärdiga tasks.
-
+#GET /tasks Hämtar alla tasks. För VG: lägg till en parameter completed som kan filtrera på färdiga eller ofärdiga tasks.
 @app.route("/tasks", methods=['GET'])
 def get_tasks():
     tasks = Todo.query.all()
@@ -52,7 +52,7 @@ def get_tasks():
     return jsonify(task_list)
 
 
-# #POST /tasks Lägger till en ny task. Tasken är ofärdig när den först läggs till.
+#POST /tasks Lägger till en ny task. Tasken är ofärdig när den först läggs till.
 @app.route("/tasks", methods=['POST'])
 def add_task():
     data = request.json
@@ -71,17 +71,29 @@ def add_task():
     
     return jsonify({"msg": "Task added! "})
 
-# # GET /tasks/{task_id} Hämtar en task med ett specifikt id.
 
+# GET /tasks/{task_id} Hämtar en task med ett specifikt id.
+@app.route("/tasks/<int:task_id>", methods=['GET'])
+def delete_task(task_id):
+    task = Todo.query.get(task_id)
+    if task is not None:
+        return jsonify({
+            'id': task.id,
+            'categories': task.categories,
+            'content': task.completed,
+            'date_created' : task.date_created
+        })
+    else:
+        return jsonify({"msg": "could not find task id"}),404
 # @app.route("/tasks/<int:task_id>", methods=['GET'])
 # def get_specific_task():
 #     return {"msg": "task_id"}
 
 # # DELETE /tasks/{task_id} Tar bort en task med ett specifikt id.
 
-# @app.route("/tasks/<int:task_id>", methods=['DELETE'])
-# def delete_task():
-#     return {"msg": "task_id"}
+     
+    
+    #return jsonify({"msg": "Task deleted"})
 
 # # PUT /tasks/{task_id} Uppdaterar en task med ett specifikt id.
 
