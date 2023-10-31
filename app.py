@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, url_for
-
+from flask_SQLalchemy import SQLalchemy
 app = Flask(__name__)
 #dkhejdawda
 @app.route("/")
