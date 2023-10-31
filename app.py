@@ -17,7 +17,7 @@ def get_tasks():
 #POST /tasks Lägger till en ny task. Tasken är ofärdig när den först läggs till.
 
 @app.route("/tasks", methods=['POST'])
-def add_tasks():
+def add_task():
     return "create task"
 
 # GET /tasks/{task_id} Hämtar en task med ett specifikt id.
@@ -28,11 +28,23 @@ def get_specific_task():
 
 # DELETE /tasks/{task_id} Tar bort en task med ett specifikt id.
 
+@app.route("/tasks/<int:task_id>", methods=['DELETE'])
+def delete_task():
+    return {"msg": "task_id"}
+
 # PUT /tasks/{task_id} Uppdaterar en task med ett specifikt id.
+
+@app.route("/tasks/<int:task_id>", methods=['PUT'])
+def update_task():
+    return {"msg": "task_id"}
 
 # PUT /tasks/{task_id}/complete Markerar en task som färdig.
 
+
+
 # GET /tasks/categories/ Hämtar alla olika kategorier.
+
+
 
 # GET /tasks/categories/{category_name} Hämtar alla tasks från en specifik kategori.
 
