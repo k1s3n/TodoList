@@ -4,10 +4,12 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from datetime import datetime
 from flask_migrate import Migrate
 
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.db'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
