@@ -16,7 +16,15 @@ def get_tasks():
 
 #POST /tasks Lägger till en ny task. Tasken är ofärdig när den först läggs till.
 
+@app.route("/tasks", methods=['POST'])
+def add_tasks():
+    return "create task"
+
 # GET /tasks/{task_id} Hämtar en task med ett specifikt id.
+
+@app.route("/tasks/<int:task_id>", methods=['GET'])
+def get_specific_task():
+    return {"msg": "task_id"}
 
 # DELETE /tasks/{task_id} Tar bort en task med ett specifikt id.
 
