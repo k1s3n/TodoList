@@ -167,7 +167,6 @@ def get_unique_categories():
 # GET /tasks/categories/{category_name} Hämtar alla tasks från en specifik kategori.
 
 
-
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
