@@ -107,8 +107,15 @@ def load_task_by_id(task_id):
 
 # # DELETE /tasks/{task_id} Tar bort en task med ett specifikt id.
 
-app.route("/tasks/<int:task_id>")
-
+@app.route("/tasks/<int:task_id>", methods=['DELETE'])
+def delete_task_by_id(task_id):
+    task = Todo.query.get(task_id)
+    if task is not None:
+        db.session.delete(task)
+        db.session.commit()
+        return jsonify({"msg": "Task deleted successfully"})
+    else:
+        return jsonify({"msg": "Task not found"}), 404
 
 # # PUT /tasks/{task_id} Uppdaterar en task med ett specifikt id.
 
@@ -117,6 +124,18 @@ app.route("/tasks/<int:task_id>")
 #     return {"msg": "task_id"}
 
 # # PUT /tasks/{task_id}/complete Markerar en task som färdig.
+
+@app.route("/tasks/<int:task_id>/completed", methods=['PUT'])
+def change_task_status(task_id):
+    task = Todo.query.get(task_id)
+    if task is not None:
+        task.completed = not task.completed  
+        db.session.commit()
+        return jsonify({"msg": "Task status updated successfully"})
+    else:
+        return jsonify({"msg": "Task not found"}), 404
+
+
 
 
 
