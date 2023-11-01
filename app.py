@@ -40,7 +40,8 @@ def new_task():
     content = request.form['content']
     completed = request.form.get('completed', False)
     categories = request.form['categories']
-    
+    dict = { "hej": 1,
+            }
     new_task = Todo(content=content, completed=completed, categories=categories)
     db.session.add(new_task)
     db.session.commit()
@@ -97,7 +98,8 @@ def delete_task(task_id):
         return jsonify({
             'id': task.id,
             'categories': task.categories,
-            'content': task.completed,
+            'content': task.content,
+            'completed': task.completed,
             'date_created' : task.date_created
         })
     else:
