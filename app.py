@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, url_for,jsonify
+from flask import Flask, request, render_template, url_for,jsonify, redirect
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from datetime import datetime
@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.db'
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -31,17 +32,33 @@ class Todo(db.Model):
             task_dict[column_name] = column_value
         
         return task_dict
-    
 
+
+#frontend
+@app.route("/new_task", methods=['POST'])
+def new_task():
+    content = request.form['content']
+    completed = request.form.get('completed', False)
+    categories = request.form['categories']
+    
+    new_task = Todo(content=content, completed=completed, categories=categories)
+    db.session.add(new_task)
+    db.session.commit()
+    return redirect(url_for('home'))
+    
+    
 
 @app.route("/")
 def home():
-     return render_template("base.html")
+    tasks = Todo.query.filter_by(completed=False).order_by(Todo.date_created.desc()).all()
+    return render_template("base.html", tasks=tasks)
+#Frontend ends
 
-# #backend
+
+##backend
 
 #GET /tasks Hämtar alla tasks. För VG: lägg till en parameter completed som kan filtrera på färdiga eller ofärdiga tasks.
-@app.route("/tasks", methods=['GET'])
+@app.route("/tasks/", methods=['GET'])
 def get_tasks():
     tasks = Todo.query.all()
     if not tasks:
