@@ -151,9 +151,6 @@ def change_task_status(task_id):
         return jsonify({"msg": "Task not found"}), 404
 
 
-
-
-
 # # GET /tasks/categories/ Hämtar alla olika kategorier.
 @app.route("/tasks/categories/", methods=['GET'])
 def get_unique_categories():
@@ -164,7 +161,18 @@ def get_unique_categories():
        categories_list.append(category[0])
 
     return jsonify({'unique_categories': categories_list})
+
+
 # GET /tasks/categories/{category_name} Hämtar alla tasks från en specifik kategori.
+@app.route("/tasks/categories/<string:categories_name>", methods=['GET'])
+def get_category_value(categories_name):
+    tasks = Todo.query.filter_by(categories=categories_name).all()
+
+    if tasks:
+        task_list = [task.as_dict() for task in tasks]
+        return jsonify(task_list)
+    else:
+        return jsonify({"msg": f"No tasks found for the cateogry: {categories_name}"})
 
 
 if __name__ == "__main__":
