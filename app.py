@@ -50,7 +50,7 @@ def new_task():
 
 @app.route("/")
 def home():
-    tasks = Todo.query.all()
+    tasks = Todo.query.filter_by(completed=False).order_by(Todo.date_created.desc()).all()
     return render_template("base.html", tasks=tasks)
 #Frontend ends
 
