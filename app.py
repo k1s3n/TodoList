@@ -155,9 +155,15 @@ def change_task_status(task_id):
 
 
 # # GET /tasks/categories/ Hämtar alla olika kategorier.
+@app.route("/tasks/categories/", methods=['GET'])
+def get_unique_categories():
+    unique_categories = db.session.query(Todo.categories).distinct().all()
 
+    categories_list = []
+    for category in unique_categories:
+       categories_list.append(category[0])
 
-
+    return jsonify({'unique_categories': categories_list})
 # GET /tasks/categories/{category_name} Hämtar alla tasks från en specifik kategori.
 
 if __name__ == "__main__":
