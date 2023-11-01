@@ -1,53 +1,110 @@
-from flask import Flask, request, render_template, url_for
+from flask import Flask, request, render_template, url_for,jsonify, redirect
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from datetime import datetime
+from flask_migrate import Migrate
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.db'
+
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(200), nullable=False)
     completed = db.Column(db.Boolean, default=False)
-    #categories = db.Column(db.String(200), nullable=False)
+    categories = db.Column(db.String(200), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    
+     
+    def as_dict(self):
+        
+        task_dict = {}
+        
+        for column in self.__table__.columns:
+            
+            column_name = column.name
+            column_value = getattr(self, column_name)
+            
+            task_dict[column_name] = column_value
+        
+        return task_dict
 
-    def __repr__(self):
-        return '<Task %r>' % self.id
+
+#frontend
+@app.route("/new_task", methods=['POST'])
+def new_task():
+    content = request.form['content']
+    completed = request.form.get('completed', False)
+    categories = request.form['categories']
+    
+    new_task = Todo(content=content, completed=completed, categories=categories)
+    db.session.add(new_task)
+    db.session.commit()
+    return redirect(url_for('home'))
+    
     
 
-
-#dkhejdawda
 @app.route("/")
 def home():
-     return render_template("base.html")
+    tasks = Todo.query.filter_by(completed=False).order_by(Todo.date_created.desc()).all()
+    return render_template("base.html", tasks=tasks)
+#Frontend ends
 
-# #backend
 
-# #GET /tasks Hämtar alla tasks. För VG: lägg till en parameter completed som kan filtrera på färdiga eller ofärdiga tasks.
+##backend
 
-# @app.route("/tasks", methods=['GET'])
-# def get_tasks():
-#     return "get all tasks"
+#GET /tasks Hämtar alla tasks. För VG: lägg till en parameter completed som kan filtrera på färdiga eller ofärdiga tasks.
+@app.route("/tasks/", methods=['GET'])
+def get_tasks():
+    tasks = Todo.query.all()
+    if not tasks:
+        return jsonify({"msg": "No task found."}), 404
+    task_list = []
+    for task in tasks:
+        task_list.append(task.as_dict())
+    return jsonify(task_list)
 
-# #POST /tasks Lägger till en ny task. Tasken är ofärdig när den först läggs till.
 
-# @app.route("/tasks", methods=['POST'])
-# def add_task():
-#     return "create task"
+#POST /tasks Lägger till en ny task. Tasken är ofärdig när den först läggs till.
+@app.route("/tasks", methods=['POST'])
+def add_task():
+    data = request.json
+    content = data.get("content")
+    completed = data.get("completed", False)
+    categories = data.get("categories")
+    
+    if not data.get("content"):
+        return jsonify({"msg": "You have write in content"})
+    elif not data.get("categories"):
+        return jsonify({"msg": "You have write in categories"})
+    else:    
+        new_task = Todo(categories=categories, completed=completed, content=content)
+        db.session.add(new_task)
+        db.session.commit()
+    
+    return jsonify({"msg": "Task added! "})
 
-# # GET /tasks/{task_id} Hämtar en task med ett specifikt id.
 
-# @app.route("/tasks/<int:task_id>", methods=['GET'])
-# def get_specific_task():
-#     return {"msg": "task_id"}
+# GET /tasks/{task_id} Hämtar en task med ett specifikt id.
+@app.route("/tasks/<int:task_id>", methods=['GET'])
+def delete_task(task_id):
+    task = Todo.query.get(task_id)
+    if task is not None:
+        return jsonify({
+            'id': task.id,
+            'categories': task.categories,
+            'content': task.completed,
+            'date_created' : task.date_created
+        })
+    else:
+        return jsonify({"msg": "could not find task id"}),404
 
 # # DELETE /tasks/{task_id} Tar bort en task med ett specifikt id.
 
-# @app.route("/tasks/<int:task_id>", methods=['DELETE'])
-# def delete_task():
-#     return {"msg": "task_id"}
 
 # # PUT /tasks/{task_id} Uppdaterar en task med ett specifikt id.
 

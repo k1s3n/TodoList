@@ -1,11 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>{% block title %}ToDo List{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Hejsan</h1> 
-</body>
+    {% block content %}
+    <div>
+        <h2>My To Do List</h2>
+
+        <form id ="MyForm" method="POST" action="/new_task">
+            <input type="text" name="content" placeholder="Content..." required>
+            <input type="text" name="categories" placeholder="Category..." required>
+            <button type="submit" class="addBtn">Add</button>
+        </form>
+        <nav></nav>
+
+    </div>
+        <ol >
+            {%for task in tasks%}
+            <li>{{task.content}}</li>
+            {%endfor%}
+        </ol>
+    {% endblock %}
+
+  </body>
+
 </html>
