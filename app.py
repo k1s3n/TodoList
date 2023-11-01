@@ -97,7 +97,8 @@ def delete_task(task_id):
         return jsonify({
             'id': task.id,
             'categories': task.categories,
-            'content': task.completed,
+            'content': task.content,
+            'completed': task.completed,
             'date_created' : task.date_created
         })
     else:
@@ -107,10 +108,25 @@ def delete_task(task_id):
 
 
 # # PUT /tasks/{task_id} Uppdaterar en task med ett specifikt id.
-
-# @app.route("/tasks/<int:task_id>", methods=['PUT'])
-# def update_task():
-#     return {"msg": "task_id"}
+@app.route("/tasks/<int:task_id>", methods=['PUT'])
+def update_task(task_id):
+    task = Todo.query.get(task_id)
+    
+    data = request.json
+    if 'content' in data:
+        task.content = data['content']
+    if 'categories' in data:
+        task.categories = data['categories']
+        
+    db.session.commit()
+             
+    return jsonify({
+            'id': task.id,
+            'categories': task.categories,
+            'content': task.content,
+            'completed': task.completed,
+            'date_created' : task.date_created
+    })
 
 # # PUT /tasks/{task_id}/complete Markerar en task som färdig.
 
