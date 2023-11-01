@@ -40,8 +40,8 @@ def new_task():
     content = request.form['content']
     completed = request.form.get('completed', False)
     categories = request.form['categories']
-    dict = { "hej": 1,
-            }
+    
+
     new_task = Todo(content=content, completed=completed, categories=categories)
     db.session.add(new_task)
     db.session.commit()
@@ -154,7 +154,7 @@ def change_task_status(task_id):
 
 
 
-# # GET /tasks/categories/ Hämtar alla olika kategorier.
+# GET /tasks/categories/ Hämtar alla olika kategorier.
 @app.route("/tasks/categories/", methods=['GET'])
 def get_unique_categories():
     unique_categories = db.session.query(Todo.categories).distinct().all()
