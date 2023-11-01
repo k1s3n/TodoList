@@ -92,7 +92,7 @@ def add_task():
 
 # GET /tasks/{task_id} Hämtar en task med ett specifikt id.
 @app.route("/tasks/<int:task_id>", methods=['GET'])
-def delete_task(task_id):
+def load_task_by_id(task_id):
     task = Todo.query.get(task_id)
     if task is not None:
         return jsonify({
@@ -106,6 +106,8 @@ def delete_task(task_id):
         return jsonify({"msg": "could not find task id"}),404
 
 # # DELETE /tasks/{task_id} Tar bort en task med ett specifikt id.
+
+app.route("/tasks/<int:task_id>")
 
 
 # # PUT /tasks/{task_id} Uppdaterar en task med ett specifikt id.
