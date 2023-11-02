@@ -166,6 +166,7 @@ def get_unique_categories():
     return jsonify({'unique_categories': categories_list})
 # GET /tasks/categories/{category_name} Hämtar alla tasks från en specifik kategori.
 
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
