@@ -48,11 +48,13 @@ def new_task():
     return redirect(url_for('home'))
     
     
-
 @app.route("/")
 def home():
     tasks = Todo.query.filter_by(completed=False).order_by(Todo.date_created.desc()).all()
-    return render_template("base.html", tasks=tasks)
+    tasks = Todo.query.filter_by(completed=True).order_by(Todo.date_created.desc()).all()
+    return render_template("base.html", completed=completed)
+    
+
 #Frontend ends
 
 
@@ -138,17 +140,31 @@ def update_task(task_id):
             'date_created' : task.date_created
     })
 
-# # PUT /tasks/{task_id}/complete Markerar en task som färdig.
-
-@app.route("/tasks/<int:task_id>/completed", methods=['PUT'])
-def change_task_status(task_id):
+# PUT /tasks/{task_id}/complete Markerar en task som färdig.
+@app.route("/tasks/<int:task_id>/complete", methods=['PUT'])
+def complete_task(task_id):
     task = Todo.query.get(task_id)
     if task is not None:
-        task.completed = not task.completed  
+        task.completed = True
         db.session.commit()
-        return jsonify({"msg": "Task status updated successfully"})
+        return jsonify({"msg": "Task marked as completed successfully"})
     else:
         return jsonify({"msg": "Task not found"}), 404
+
+
+
+@app.route("/update_tasks", methods=['POST'])
+def update_tasks():
+    task_ids = request.form.getlist('task_ids')
+    
+   
+    for task in Todo.query.filter(Todo.id.in_(task_ids)):
+        task.completed = True
+
+    db.session.commit()
+
+    return redirect(url_for('home'))
+
 
 
 

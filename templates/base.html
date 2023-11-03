@@ -7,6 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ToDo List{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .header {
+            display: flex;
+            justify-content: space-between;
+        }
+        .header h3 {
+            margin-right: 500px;   justify-content: space-between;
+        }
+    </style>
 </head>
 <body>
     {% block content %}
@@ -21,13 +30,36 @@
         <nav></nav>
 
     </div>
-        <ol >
-            {%for task in tasks%}
-            <li>{{task.content}}</li>
-            {%endfor%}
+    
+    </label>
+    <div class="header">
+        <h3>Tasks</h3>
+        <h3>Categories</h3>
+    </div>
+    
+    <form method="POST" action="/update_tasks">
+        <ol>
+            {% for pending in pendings %}
+            <li>
+                <input type="checkbox" id="task_{{ task.id }}" name="task_ids" value="{{ task.id }}">
+                <label for="task_{{ task.id }}">{{ pending.content }}</label>
+            </li>
+            {% endfor %}
         </ol>
+        <button type="submit" class="updateBtn">Update tasks</button>
+    </form>
+    
+    
+    <h3>Completed Tasks</h3>
+    <ol>
+        {% for complete in completed %}
+        {% if complete.completed %}
+        <li>
+            <label for="task_{{ task.id }}">{{ complete.content }}</label>
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ol>
     {% endblock %}
-
-  </body>
-
+</body>
 </html>
