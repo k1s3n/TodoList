@@ -35,6 +35,12 @@ class Todo(db.Model):
 
 
 #frontend
+@app.route("/")
+def home():
+    tasks = Todo.query.all()
+    return render_template("base.html", tasks = tasks)
+
+
 @app.route("/new_task", methods=['POST'])
 def new_task():
     content = request.form['content']
@@ -46,18 +52,50 @@ def new_task():
     db.session.add(new_task)
     db.session.commit()
     return redirect(url_for('home'))
+
     
     
-@app.route("/")
-def home():
-    tasks = Todo.query.all()
-    return render_template("base.html", tasks = tasks)
+@app.route("/delete_task/<int:task_id>", methods=['POST'])
+def delete_task(task_id):
+    task = Todo.query.get(task_id)
+    if task is not None:
+        db.session.delete(task)
+        db.session.commit()
+        return redirect(url_for('home'))
+    else:
+        return jsonify({"msg": "Task not found"},404)
+    
+    
+@app.route("/update_tasks", methods=['POST'])
+def update_tasks():
+    task_ids = request.form.getlist('task_ids')
+    
+   
+    for task in Todo.query.filter(Todo.id.in_(task_ids)):
+        task.completed = not task.completed
+
+    db.session.commit()
+
+    return redirect(url_for('home'))
+
+
+@app.route("/update_tasks/<int:task_id>", methods=['POST'])
+def update_tasks_completed(task_id):
+    task = Todo.query.get(task_id)
+    
+    task.completed = not task.completed
+
+    db.session.commit()
+
+    return redirect(url_for('home'))
+
+
 
 
 #Frontend ends
 
 
-##backend
+##backend STARTS
 
 
 #GET /tasks Hämtar alla tasks. För VG: lägg till en parameter completed som kan filtrera på färdiga eller ofärdiga tasks.
@@ -150,34 +188,6 @@ def complete_task(task_id):
         return jsonify({"msg": "Task marked as completed successfully"})
     else:
         return jsonify({"msg": "Task not found"}), 404
-
-
-
-@app.route("/update_tasks", methods=['POST'])
-def update_tasks():
-    task_ids = request.form.getlist('task_ids')
-    
-   
-    for task in Todo.query.filter(Todo.id.in_(task_ids)):
-        task.completed = not task.completed
-
-    db.session.commit()
-
-    return redirect(url_for('home'))
-
-@app.route("/update_tasks/<int:task_id>", methods=['POST'])
-def update_tasks_completed(task_id):
-    task = Todo.query.get(task_id)
-    
-    task.completed = not task.completed
-
-    db.session.commit()
-
-    return redirect(url_for('home'))
-
-
-
-
 
 
 # GET /tasks/categories/ Hämtar alla olika kategorier.
