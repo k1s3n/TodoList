@@ -8,13 +8,6 @@
     <title>{% block title %}ToDo List{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        .header {
-            display: flex;
-            justify-content: space-between;
-        }
-        .header h3 {
-            margin-right: 500px;   justify-content: space-between;
-        }
     </style>
 </head>
 <body>
@@ -34,32 +27,81 @@
     </label>
     <div class="header">
         <h3>Tasks</h3>
-        <h3>Categories</h3>
     </div>
     
     <form method="POST" action="/update_tasks">
-        <ol>
-            {% for pending in pendings %}
+        <ul class="list_clean">
+            {% for task in tasks %}
+            {% if not task.completed %}
             <li>
                 <input type="checkbox" id="task_{{ task.id }}" name="task_ids" value="{{ task.id }}">
-                <label for="task_{{ task.id }}">{{ pending.content }}</label>
+                <label for="task_{{ task.id }}">{{ task.content }}</label>
             </li>
+            {% endif %}
             {% endfor %}
-        </ol>
-        <button type="submit" class="updateBtn">Update tasks</button>
+        </ul>
+        <button type="submit" class="updateBtn">Complete Task</button>
     </form>
     
     
     <h3>Completed Tasks</h3>
-    <ol>
-        {% for complete in completed %}
-        {% if complete.completed %}
+    <form method="POST" action="/update_tasks">
+    <ul class="list_clean">
+        {% for task in tasks %}
+        {% if task.completed %}
         <li>
-            <label for="task_{{ task.id }}">{{ complete.content }}</label>
+            <input type="checkbox" id="task_{{ task.id }}" name="task_ids" value="{{ task.id }}">
+            <label for="task_{{ task.id }}">{{ task.content }}</label>
         </li>
         {% endif %}
         {% endfor %}
-    </ol>
+    </ul>
+    <button type="submit" class="updateBtn">Reverse Task</button>
+    </form>
+    
+
+    <ul class="list_clean">
+        <h3>Pending</h3>
+        <li class="list-header">
+            <span class="header-item">Tasks</span>
+            <span class="header-item">Category</span>
+            <span class="header-item">Tid</span>
+        </li>
+        {% for task in tasks %}
+        {% if not task.completed %}
+        <li class="list-item">
+            <span class="item">{{ task.content }}</span>
+            <span class="item">{{ task.categories }}</span>
+            <span class="item">{{ task.date_created}}</span>
+            <form method="POST" action="/update_tasks/{{ task.id }}" class="updateBtn">
+            <button type="submit" class="updateBtn">Complete</button>
+        </li>
+    </form>
+        {% endif %}
+        {% endfor %}
+    </ul>
+
+
+    <h3>Completed</h3>
+    <ul class="list_clean">
+        <li class="list-header">
+            <span class="header-item">Tasks</span>
+            <span class="header-item">Category</span>
+            <span class="header-item">Tid</span>
+        </li>
+        {% for task in tasks %}
+        {% if task.completed %}
+        <li class="list-item">
+            <span class="item">{{ task.content }}</span>
+            <span class="item">{{ task.categories }}</span>
+            <span class="item">{{ task.date_created}}</span>
+            <form method="POST" action="/update_tasks/{{ task.id }}" class="updateBtn">
+            <button type="submit" class="updateBtn">Uncompleted</button>
+        </li>
+    </form>
+        {% endif %}
+        {% endfor %}
+    </ul>
     {% endblock %}
 </body>
 </html>

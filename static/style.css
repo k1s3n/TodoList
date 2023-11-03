@@ -1,0 +1,33 @@
+.list_clean {
+    list-style: none;
+    padding: 0px;
+
+}
+.list_clean .list-header {
+    display: flex;
+    justify-content: space-between;
+    background: #ebe8e8;
+    font-weight: bold;
+    font-size: 20px;
+    padding: 0px 600px;
+}
+
+.list_clean .list-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 580px;
+    font-size: 15px;
+    transition: 0.2s;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.list_clean .header-item,
+.list_clean .item {
+    flex: 1;
+    text-align: left;
+    padding: 5px 0px;
+    border: 0px solid #ddd; /* Lägg till en kant runt varje kolumn om det behövs */
+}

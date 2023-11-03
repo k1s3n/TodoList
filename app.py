@@ -50,15 +50,15 @@ def new_task():
     
 @app.route("/")
 def home():
-    tasks = Todo.query.filter_by(completed=False).order_by(Todo.date_created.desc()).all()
-    tasks = Todo.query.filter_by(completed=True).order_by(Todo.date_created.desc()).all()
-    return render_template("base.html", completed=completed)
-    
+    tasks = Todo.query.all()
+    return render_template("base.html", tasks = tasks)
+
 
 #Frontend ends
 
 
 ##backend
+
 
 #GET /tasks Hämtar alla tasks. För VG: lägg till en parameter completed som kan filtrera på färdiga eller ofärdiga tasks.
 @app.route("/tasks/", methods=['GET'])
@@ -159,7 +159,17 @@ def update_tasks():
     
    
     for task in Todo.query.filter(Todo.id.in_(task_ids)):
-        task.completed = True
+        task.completed = not task.completed
+
+    db.session.commit()
+
+    return redirect(url_for('home'))
+
+@app.route("/update_tasks/<int:task_id>", methods=['POST'])
+def update_tasks_completed(task_id):
+    task = Todo.query.get(task_id)
+    
+    task.completed = not task.completed
 
     db.session.commit()
 
