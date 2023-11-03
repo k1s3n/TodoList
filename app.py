@@ -99,15 +99,34 @@ def update_tasks_completed(task_id):
 
 
 #GET /tasks Hämtar alla tasks. För VG: lägg till en parameter completed som kan filtrera på färdiga eller ofärdiga tasks.
-@app.route("/tasks/", methods=['GET'])
+
+
+@app.route("/tasks", methods=['GET'])
 def get_tasks():
-    tasks = Todo.query.all()
-    if not tasks:
-        return jsonify({"msg": "No task found."}), 404
+    completed_para = request.args.get('completed')
+    
+    if completed_para:
+        if completed_para == "false":
+            completed = False
+        elif completed_para == "true":
+            completed = True
+        else:
+            return jsonify({"msg": "ogiltig parameter för completed"}),400
+    else:
+        completed = None
+    
+    
+    if completed is not None:
+        tasks = Todo.query.filter_by(completed=completed).all()
+    else:
+        tasks = Todo.query.all()
+    
     task_list = []
+    
     for task in tasks:
         task_list.append(task.as_dict())
-    return jsonify(task_list)
+    
+    return jsonify({'tasks': task_list})
 
 
 #POST /tasks Lägger till en ny task. Tasken är ofärdig när den först läggs till.
@@ -200,8 +219,20 @@ def get_unique_categories():
        categories_list.append(category[0])
 
     return jsonify({'unique_categories': categories_list})
-# GET /tasks/categories/{category_name} Hämtar alla tasks från en specifik kategori.
 
+# GET /tasks/categories/{category_name} Hämtar alla tasks från en specifik kategori.
+@app.route("/tasks/categories/<string:category_name>", methods=['GET'])
+def get_list_category_name(category_name):
+    tasks = Todo.query.filter_by(categories=category_name).all()
+    
+    task_list = []
+    if tasks:
+        for task in tasks:
+            task_list.append(task.as_dict())
+        return jsonify(task_list)
+    else:
+        return jsonify({"msg": f"Could not find any with {category_name}"})
+        
 
 if __name__ == "__main__":
     with app.app_context():
