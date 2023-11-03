@@ -61,9 +61,8 @@
     
 
     <ul class="list_clean">
-        <h3>Pending</h3>
         <li class="list-header">
-            <span class="header-item">Tasks</span>
+            <span class="header-item">Tasks Pending</span>
             <span class="header-item">Category</span>
             <span class="header-item">Tid</span>
         </li>
@@ -82,10 +81,9 @@
     </ul>
 
 
-    <h3>Completed</h3>
     <ul class="list_clean">
         <li class="list-header">
-            <span class="header-item">Tasks</span>
+            <span class="header-item">Tasks Completed</span>
             <span class="header-item">Category</span>
             <span class="header-item">Tid</span>
         </li>
@@ -96,7 +94,7 @@
             <span class="item">{{ task.categories }}</span>
             <span class="item">{{ task.date_created}}</span>
             <form method="POST" action="/update_tasks/{{ task.id }}" class="updateBtn">
-            <button type="submit" class="updateBtn">Uncompleted</button>
+            <button type="submit" class="updateBtn">Uncomplete</button>
         </li>
     </form>
         {% endif %}
