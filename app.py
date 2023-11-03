@@ -47,12 +47,17 @@ def new_task():
     db.session.commit()
     return redirect(url_for('home'))
     
-    
+@app.route("/completed")
+def home():
+    tasks = Todo.query.filter_by(completed=True).order_by(Todo.date_created.desc()).all()
+    return render_template("base.html", tasks=tasks)
 
 @app.route("/")
 def home():
     tasks = Todo.query.filter_by(completed=False).order_by(Todo.date_created.desc()).all()
+    
     return render_template("base.html", tasks=tasks)
+    
 #Frontend ends
 
 
