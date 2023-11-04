@@ -3,13 +3,17 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from datetime import datetime
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token
+
 
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.db'
+app.config['JWT_SECRET_KEY'] = 'super-secret-key'
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+jwt = JWTManager(app)
 
 
 class Todo(db.Model):
@@ -110,6 +114,8 @@ def update_tasks_completed(task_id):
 
 
 #Frontend ends
+
+
 
 
 ##backend STARTS
