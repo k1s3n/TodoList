@@ -35,6 +35,11 @@ class Todo(db.Model):
 
 
 #frontend
+@app.route("/category", methods=['GET'])
+def cat_sort():
+    cat_sort = db.session()
+    return redirect(url_for('home_modified'))
+
 @app.route("/")
 def home():
     tasks = Todo.query.all()
@@ -53,7 +58,7 @@ def new_task():
     categories = request.form['categories']
     
 
-    new_task = Todo(content=content, completed=completed, categories=categories)
+    new_task = Todo(content=content, completed=completed, categories=categories.capitalize())
     db.session.add(new_task)
     db.session.commit()
 
@@ -154,7 +159,7 @@ def add_task():
     elif not data.get("categories"):
         return jsonify({"msg": "You have write in categories"})
     else:    
-        new_task = Todo(categories=categories, completed=completed, content=content)
+        new_task = Todo(completed=completed, content=content,categories=categories.capitalize())
         db.session.add(new_task)
         db.session.commit()
     

@@ -67,7 +67,7 @@
             <td>{{ task.categories }}</td>
             <td>{{ task.date_created }}</td>
             <form method="POST" action="/update_tasks/{{ task.id }}" class="updateBtn">
-            <td><button type="submit" class="updateBtn">Complete</button></td>
+            <td><button type="submit" class="updateBtn">Undo</button></td>
                 </form>
         </tr>
         {% endif %}
