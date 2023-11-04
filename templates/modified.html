@@ -8,11 +8,87 @@
 </head>
 <body>
     {% block content %}
-    <ul class="list_clean">
-        <li class="list_header">
+    <div class="table-container">
+    <table class="list-table">
+        
+            <th></th>
+            <th><h1>ToDo List</h1></th>
+            <th></th>
+            <th></th>
+        </tr>
+        <tr>
             <form id ="MyForm" method="POST" action="/new_task">
+                <th></th>
+                <th><input type="text" name="content" placeholder="Task..." required></th>
+                <th><input type="text" name="categories" placeholder="Category..." required></th>
+                <th><button type="submit" class="addBtn">Add</button></td>
+                </form>
+        </tr>
+        <tr>
+            <th>Tasks</1th>
+            <th>Category</th>
+            <th>Time</th>
+            <th></th>
+        </tr>
+        {% if tasks %}
+            {% for task in tasks %}
+            {% set has_pending_tasks = false %}
+                {% if not task.completed%}
+                    <tr class="list-item">
+                        <td>{{ task.content }}</td>
+                        <td>{{ task.categories }}</td>
+                        <td>{{ task.date_created }}</td>
+                        <td>
+                            <form method="POST" action="/update_tasks/{{ task.id }}" class="updateBtn">
+                                <button type="submit" class="updateBtn">Complete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% set has_pending_tasks = true %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        
+        {% if not has_pending_tasks %}
+            <tr>
+                <td colspan="4">Det finns inga uppgifter som är avvaktande.</td>
+            </tr>
+        {% endif %}
+        <tr>
+            <th>Tasks Completed</1th>
+            <th>Category</th>
+            <th>Time</th>
+            <th></th>
+        </tr>
+        {% for task in tasks %}
+        {% if task.completed%}
+        <tr class="list-item">
+            <td>{{ task.content }}</td>
+            <td>{{ task.categories }}</td>
+            <td>{{ task.date_created }}</td>
+            <form method="POST" action="/update_tasks/{{ task.id }}" class="updateBtn">
+            <td><button type="submit" class="updateBtn">Complete</button></td>
+                </form>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </table>
+
+    <table class="list-table">
+        
+    </table>
+
+
+
+
+
+<!--
+    <ul class="list_clean">
+        <li class="input">
+            <form id ="MyForm" method="POST" action="/new_task">
+                <span class="header-item"><h3>Todo List</h3></span>
                 <span class="header-item"><input type="text" name="content" placeholder="Task..." required></span>
-                <input type="text" name="categories" placeholder="Category..." required>
+                <span class="header-item"><input type="text" name="categories" placeholder="Category..." required></span>
                 <button type="submit" class="addBtn">Add</button>
             </form>
         </li>
@@ -59,6 +135,7 @@
         {% endif %}
         {% endfor %}
     </ul>
+-->
     {% endblock %}
 </body>
 </html>

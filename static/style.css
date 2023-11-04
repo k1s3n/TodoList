@@ -1,6 +1,41 @@
+.list-table {
+    width: 40%;
+    max-height: 400px;
+    overflow-y: auto;
+    border-collapse: collapse; /* Använd 'separate' istället för 'collapse' för att ha celler utan ramar mellan dem */
+    border: 1px solid #ddd;
+    
+}
+
+.list-table th, .list-table td {
+    border: 0; /* Ta bort kantlinjer på alla <th> och <td> */
+    padding: 8px;
+    text-align: center;
+}
+
+.list-table th {
+    background-color: #ebe8e8;
+    font-weight: bold;
+}
+
+.list-item {
+    border-collapse: separate;
+    border: 1px solid #ddd; /* Lägg till en border runt hela <tr> med klassen "list-item" */
+    
+}
+
+.table-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 120vh;
+}
+
+
 .list_clean {
     list-style: none;
     padding: 0px;
+    
 
 }
 .list_clean .list-header {
@@ -12,8 +47,17 @@
     padding: 0px 550px;
 }
 
-.list_clean .list-item {
+.list_clean .input {
     display: flex;
+    justify-content: space-between;
+    background: #ebe8e8;
+    font-weight: bold;
+    font-size: 20px;
+    padding: 0px 700px;
+}
+
+.list_clean .list-item {
+    display:flex;
     justify-content: space-between;
     padding: 4px 580px;
     font-size: 15px;
@@ -22,6 +66,8 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    border: 1px solid #ddd;
+    border-radius: 0%;
 }
 
 .list_clean .header-item,

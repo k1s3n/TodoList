@@ -99,7 +99,7 @@ def update_tasks_completed(task_id):
 
     db.session.commit()
 
-    return redirect(url_for('modified'))
+    return redirect(url_for('home_modified'))
 
 
 
