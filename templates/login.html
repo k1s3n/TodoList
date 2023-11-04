@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Login{% endblock %}</title>
+</head>
+<body>
+    {%block content%}
+    <div class="table-container">
+        <table class="list-table">
+            
+                <th><h1>Login</h1></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr class="list-item">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+                {% endwith %}
+                <form id ="MyForm" method="POST" action="/login">
+                <td>
+                    <input type="text" name="username" placeholder="username..." required>
+                </td>
+                <td>
+                    <input type="text" name="password" placeholder="password..." required>
+                </td>
+                <td>
+                    <button type="submit" class="addBtn">Login</button>
+                </td>
+                    
+                </form>
+                {%endblock%} 
+</body>
+</html>

@@ -1,28 +1,41 @@
-from flask import Flask, request, render_template, url_for,jsonify, redirect
+from flask import Flask, request, render_template, url_for,jsonify, redirect, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from datetime import datetime
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
+from flask_bcrypt import Bcrypt
 
 
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'super-secret-key'
+app.secret_key = 'hejhå'
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
 
 
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True, unique=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(120), nullable=False)
+    
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+    
+    
+
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(200), nullable=False)
     completed = db.Column(db.Boolean, default=False)
     categories = db.Column(db.String(200), nullable=False)
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
-    
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)  
      
     def as_dict(self):
         
@@ -39,10 +52,39 @@ class Todo(db.Model):
 
 
 #frontend
-@app.route("/category", methods=['GET'])
-def cat_sort():
-    cat_sort = db.session()
-    return redirect(url_for('home_modified'))
+@app.route("/register", methods=['POST', 'GET'])
+def register_user():
+    if request.method == 'POST':
+        bcrypt = Bcrypt()
+        username = request.form['username']
+        password = request.form['username']
+        
+        
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        
+        new_user = User(username=username, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect('login')
+    else:
+        return render_template('register.html')
+
+@app.route("/login", methods=['POST', 'GET'])
+def login():
+    if request.method == "POST":
+        bcrypt = Bcrypt()
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        username_db = User.query.filter_by(username=username).first()
+        
+        if username_db and bcrypt.check_password_hash(username_db.password, password):
+            return redirect(url_for('home'))
+        else:
+            flash("Fel lösenord eller användarnamn. Försök igen.", "error")
+
+    return render_template("login.html")
+
 
 @app.route("/")
 def home():
@@ -123,6 +165,15 @@ def update_tasks_completed(task_id):
 
 #GET /tasks Hämtar alla tasks. För VG: lägg till en parameter completed som kan filtrera på färdiga eller ofärdiga tasks.
 
+@app.route("/users")
+def get_users():
+    users = User.query.all()
+
+    user_list = []
+    for user in users:
+        user_list.append({"id": user.id, 'username': user.username, 'password': user.password})
+    
+    return jsonify({"users" : user_list})
 
 @app.route("/tasks", methods=['GET'])
 def get_tasks():
