@@ -40,6 +40,11 @@ def home():
     tasks = Todo.query.all()
     return render_template("base.html", tasks = tasks)
 
+@app.route("/modified")
+def home_modified():
+    tasks = Todo.query.all()
+    return render_template("modified.html", tasks = tasks)
+
 
 @app.route("/new_task", methods=['POST'])
 def new_task():
@@ -51,7 +56,14 @@ def new_task():
     new_task = Todo(content=content, completed=completed, categories=categories)
     db.session.add(new_task)
     db.session.commit()
-    return redirect(url_for('home'))
+
+    referrer = request.referrer
+    if referrer and referrer.endswith('/modified'):
+        destination = 'home_modified'
+    else:
+        destination = 'home'
+          
+    return redirect(url_for(destination))
 
     
     
@@ -61,7 +73,7 @@ def delete_task(task_id):
     if task is not None:
         db.session.delete(task)
         db.session.commit()
-        return redirect(url_for('home'))
+        return redirect(url_for('home_modified'))
     else:
         return jsonify({"msg": "Task not found"},404)
     
@@ -87,7 +99,7 @@ def update_tasks_completed(task_id):
 
     db.session.commit()
 
-    return redirect(url_for('home'))
+    return redirect(url_for('modified'))
 
 
 
@@ -106,9 +118,9 @@ def get_tasks():
     completed_para = request.args.get('completed')
     
     if completed_para:
-        if completed_para == "false":
+        if completed_para.lower() == "false":
             completed = False
-        elif completed_para == "true":
+        elif completed_para.lower() == "true":
             completed = True
         else:
             return jsonify({"msg": "ogiltig parameter för completed"}),400
