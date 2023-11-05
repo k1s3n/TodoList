@@ -14,14 +14,15 @@
                 {% if 'user' in session %}
                     <td colspan="3">Välkommen, {{ session['user'] }}!</td>
                     <td>
-                        <a href="/modified">Todo List</a>
-                        <a href="/logout">Logout</a>
+                        <a class="futuristic-links" href="/modified">Todo List</a>
+                        <a class="futuristic-links" href="/logout">Logout</a>
                     </td>
                 {% else %}
+                <div class="links">
                     <td colspan="3">
-                        <a href="/modified">Todo List</a>
-                        <a href="/register">Register</a>
-                        <a href="/login">Login</a>
+                    | <a class="futuristic-links" href="/modified">Todo List</a> |
+                    <a class="futuristic-links" href="/register">Register</a> |
+                    <a class="futuristic-links" href="/login">Login</a> |
                     </td>
                 {% endif %}
             </tr>
