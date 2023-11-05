@@ -7,36 +7,43 @@
     <title>{% block title %}Login{% endblock %}</title>
 </head>
 <body>
-    {%block content%}
+    {% block content %}
     <div class="table-container">
         <table class="list-table">
-            
-                <th><h1>Login</h1></th>
-                <th></th>
-                <th></th>
-            </tr>
-            <tr class="list-item">
-                {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    <ul class="flashes">
-                    {% for message in messages %}
-                        <li>{{ message }}</li>
-                    {% endfor %}
-                    </ul>
-                {% endif %}
-                {% endwith %}
-                <form id ="MyForm" method="POST" action="/login">
-                <td>
-                    <input type="text" name="username" placeholder="username..." required>
-                </td>
-                <td>
-                    <input type="text" name="password" placeholder="password..." required>
-                </td>
-                <td>
-                    <button type="submit" class="addBtn">Login</button>
-                </td>
-                    
-                </form>
-                {%endblock%} 
+            <thead>
+                <tr>
+                    <th><h1>Login</h1></th>
+                    <th>
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <ul class="flash-messages">
+                                {% for category, message in messages %}
+                                    <li class="{{ category }}">{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% endwith %}
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="list-item">
+                    <form id="MyForm" method="POST" action="/login">
+                        <td>
+                            <input type="text" name="username" placeholder="username..." required>
+                        </td>
+                        <td>
+                            <input type="password" name="password" placeholder="password..." required>
+                        </td>
+                        <td>
+                            <button type="submit" class="addBtn">Login</button>
+                        </td>
+                    </form>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endblock %}
 </body>
 </html>

@@ -1,22 +1,28 @@
-from flask import Flask, request, render_template, url_for,jsonify, redirect, flash
+from flask_session import Session
+from flask import Flask, request, session, render_template, url_for,jsonify, redirect, flash
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from datetime import datetime
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
 from flask_bcrypt import Bcrypt
-
-
+import secrets
 
 app = Flask(__name__)
+secret_key = secrets.token_urlsafe(32)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'super-secret-key'
-app.secret_key = 'hejhå'
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_TYPE'] = 'filesystem'
+#app.config['SECRET_KEY'] = "Your_secret_string"
 
+Session(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
+
+
 
 
 class User(db.Model):
@@ -52,12 +58,18 @@ class Todo(db.Model):
 
 
 #frontend
+@app.route('/logout')
+def logout_user():
+    session.clear()
+    return redirect(url_for('home_modified'))
+
+
 @app.route("/register", methods=['POST', 'GET'])
 def register_user():
     if request.method == 'POST':
         bcrypt = Bcrypt()
-        username = request.form['username']
-        password = request.form['username']
+        username = request.form.get('username')
+        password = request.form.get('password')
         
         
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -69,19 +81,22 @@ def register_user():
     else:
         return render_template('register.html')
 
+
 @app.route("/login", methods=['POST', 'GET'])
 def login():
     if request.method == "POST":
         bcrypt = Bcrypt()
         username = request.form.get('username')
         password = request.form.get('password')
-        
+
         username_db = User.query.filter_by(username=username).first()
-        
+
         if username_db and bcrypt.check_password_hash(username_db.password, password):
-            return redirect(url_for('home'))
+            session['user'] = username
+            return redirect(url_for('home_modified'))
         else:
-            flash("Fel lösenord eller användarnamn. Försök igen.", "error")
+            flash("Wrong password or username. Please try again.", "error")
+            return redirect(url_for('login'))
 
     return render_template("login.html")
 

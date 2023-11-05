@@ -33,3 +33,15 @@
     align-items: center;
     height: 150vh;
 }
+
+/* Styling for info messages */
+.info {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Styling for error messages */
+.error {
+    background-color: #dc3545;
+    color: #fff;
+}

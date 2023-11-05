@@ -10,12 +10,25 @@
     {% block content %}
     <div class="table-container">
     <table class="list-table">
-        
-            <th></th>
-            <th><h1>ToDo List</h1></th>
-            <th></th>
-            <th></th>
+        <tr>
+            {% if 'user' in session %}
+                <td colspan="3">Welcome, {{ session['user'] }}!</td>
+                <td> <a href="/logout">Logout</a></td>
+            {% else %}
+                <td colspan="3">
+                    <a href="/register">Register</a>
+                    <a href="/login">Login</a>
+                </td>
+            {% endif %}
         </tr>
+        
+        <tr>
+            <th colspan="4"><h2>ToDo List</h2></th>
+        </tr>
+        {% if 'user' not in session%}
+        <td colspan="4">Du måste vara <a href="register">registrera</a> dig eller <a href="/login">logga in<a> för att se eller skapa Todo lista</d>
+        {% elif tasks %}
+        
         <tr>
             <form id ="MyForm" method="POST" action="/new_task">
                 <th></th>
@@ -28,11 +41,12 @@
             <th>Tasks</1th>
             <th>Category</th>
             <th>Date Created</th>
-            <th></th>
+            <th>
+            </th>
         </tr>
-        {% if tasks %}
+       
+        
             {% for task in tasks %}
-            {% set has_pending_tasks = false %}
                 {% if not task.completed%}
                     <tr class="list-item">
                         <td>{{ task.content }}</td>
@@ -44,16 +58,12 @@
                             </form>
                         </td>
                     </tr>
-                    {% set has_pending_tasks = true %}
+
                 {% endif %}
             {% endfor %}
         {% endif %}
-        
-        {% if not has_pending_tasks %}
-            <tr>
-                <td colspan="4">Det finns inga uppgifter som är avvaktande.</td>
-            </tr>
-        {% endif %}
+        {%if 'user' not in session%}
+        {%else%}
         <tr>
             <th>Tasks Completed</1th>
             <th>Category</th>
@@ -70,8 +80,10 @@
             <td><button type="submit" class="updateBtn">Undo</button></td>
                 </form>
         </tr>
+        
         {% endif %}
         {% endfor %}
+        {% endif %}
     </table>
 
     <table class="list-table">
