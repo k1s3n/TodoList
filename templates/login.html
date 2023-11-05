@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Login{% endblock %}</title>
+    
 </head>
 <body>
     {% block content %}
@@ -12,8 +13,27 @@
         <table class="list-table">
             <thead>
                 <tr>
-                    <th><h1>Login</h1></th>
-                    <th>
+                    {% if 'user' in session %}
+                        <td colspan="3">Välkommen, {{ session['user'] }}!</td>
+                        
+                        <td>
+                            <a href="/modified">Todo List</a> 
+                            <a href="/logout">Logout</a>
+                        </td>
+                    {% else %}
+                        <td colspan="3">
+                            <a href="/modified">Todo List</a>
+                            <a href="/register">Register</a>
+                            <a href="/login">Login</a>
+                        </td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <th colspan="4"><h2>Login</h2></th>
+                </tr>
+
+                <tr>
+                    <td>
                         {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
                             <ul class="flash-messages">
@@ -23,20 +43,14 @@
                             </ul>
                         {% endif %}
                         {% endwith %}
-                    </th>
-                    <th></th>
+                    </td>
                 </tr>
             </thead>
             <tbody>
-                <tr class="list-item">
                     <form id="MyForm" method="POST" action="/login">
-                        <td>
+                        <td colspan="4">
                             <input type="text" name="username" placeholder="username..." required>
-                        </td>
-                        <td>
                             <input type="password" name="password" placeholder="password..." required>
-                        </td>
-                        <td>
                             <button type="submit" class="addBtn">Login</button>
                         </td>
                     </form>

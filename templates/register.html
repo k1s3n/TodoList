@@ -10,24 +10,44 @@
     {%block content%}
     <div class="table-container">
         <table class="list-table">
-            
-                <th><h1>Register</h1></th>
-                <th></th>
-                <th></th>
+            <tr>
+                {% if 'user' in session %}
+                    <td colspan="3">Välkommen, {{ session['user'] }}!</td>
+                    <td>
+                        <a href="/modified">Todo List</a>
+                        <a href="/logout">Logout</a>
+                    </td>
+                {% else %}
+                    <td colspan="3">
+                        <a href="/modified">Todo List</a>
+                        <a href="/register">Register</a>
+                        <a href="/login">Login</a>
+                    </td>
+                {% endif %}
             </tr>
-            <tr class="list-item">
+                <th colspan="3"><h2>Register</h2></th>
+            </tr>
+                <td>
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <ul class="flash-messages">
+                            {% for category, message in messages %}
+                                <li class="{{ category }}">{{ message }}</li>
+                            {% endfor %}
+                                    </ul>
+                        {% endif %}
+                    {% endwith %}
+                </td>
+            <tr>
                 <form id ="MyForm" method="POST" action="/register">
                 <td>
-                    <input type="text" name="username" placeholder="username..." required>
-                </td>
-                <td>
-                    <input type="text" name="password" placeholder="password..." required>
-                </td>
-                <td>
+                    <input type="text" name="username" placeholder="Användarnamn..." required>
+                    <input type="text" name="password" placeholder="Lösenord..." required>
+                    <input type="text" name="password2" placeholder="Bekräfta password.." required>
                     <button type="submit" class="addBtn">Register</button>
-                </td>
-                    
+                </td>             
                 </form>
+            </tr>
     {%endblock%}
 </body>
 </html>

@@ -70,14 +70,19 @@ def register_user():
         bcrypt = Bcrypt()
         username = request.form.get('username')
         password = request.form.get('password')
+        password2 = request.form.get('password2')
+
+        if not password2 == password:
+            flash("Lösenordet stämmer inte överens", "error")
+            return redirect('/register')
+        else:
         
-        
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-        
-        new_user = User(username=username, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-        return redirect('login')
+            hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+            
+            new_user = User(username=username, password=hashed_password)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect('login')
     else:
         return render_template('register.html')
 
@@ -95,7 +100,7 @@ def login():
             session['user'] = username
             return redirect(url_for('home_modified'))
         else:
-            flash("Wrong password or username. Please try again.", "error")
+            flash("Fel användarnamn eller lösenord. Försök igen", "error")
             return redirect(url_for('login'))
 
     return render_template("login.html")
@@ -166,8 +171,6 @@ def update_tasks_completed(task_id):
     db.session.commit()
 
     return redirect(url_for('home_modified'))
-
-
 
 
 #Frontend ends

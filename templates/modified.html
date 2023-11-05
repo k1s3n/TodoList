@@ -5,23 +5,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ToDo List{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    
     {% block content %}
     <div class="table-container">
     <table class="list-table">
         <tr>
             {% if 'user' in session %}
-                <td colspan="3">Welcome, {{ session['user'] }}!</td>
-                <td> <a href="/logout">Logout</a></td>
+                <td colspan="3">Välkommen, {{ session['user'] }}!</td>
+                <td>
+                    <a href="/modified">Todo List</a>
+                    <a href="/logout">Logout</a>
+                </td>
             {% else %}
                 <td colspan="3">
+                    <a href="/modified">Todo List</a>
                     <a href="/register">Register</a>
                     <a href="/login">Login</a>
                 </td>
             {% endif %}
         </tr>
-        
         <tr>
             <th colspan="4"><h2>ToDo List</h2></th>
         </tr>
@@ -86,10 +91,7 @@
         {% endif %}
     </table>
 
-    <table class="list-table">
-        
-    </table>
-
+    
 
 
 
