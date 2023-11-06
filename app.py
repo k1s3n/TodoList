@@ -3,19 +3,22 @@ from flask import Flask, request, session, render_template, url_for,jsonify, red
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_migrate import Migrate
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity, get_current_user    
 from flask_bcrypt import Bcrypt
 import secrets
 
 app = Flask(__name__)
 secret_key = secrets.token_urlsafe(32)
 
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'super-secret-key'
+app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(32)
+#app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies']
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_TYPE'] = 'filesystem'
-#app.config['SECRET_KEY'] = "Your_secret_string"
+
+#app.config['SECRET_KEY'] = ""
 
 Session(app)
 db = SQLAlchemy(app)
@@ -98,6 +101,7 @@ def login():
 
         if username_db and bcrypt.check_password_hash(username_db.password, password):
             session['user'] = username
+            access_token = create_access_token(identity=username)
             return redirect(url_for('home_modified'))
         else:
             flash("Fel användarnamn eller lösenord. Försök igen", "error")
@@ -134,20 +138,7 @@ def new_task():
     else:
         destination = 'home'
           
-    return redirect(url_for(destination))
-
-    
-    
-@app.route("/delete_task/<int:task_id>", methods=['POST'])
-def delete_task(task_id):
-    task = Todo.query.get(task_id)
-    if task is not None:
-        db.session.delete(task)
-        db.session.commit()
-        return redirect(url_for('home_modified'))
-    else:
-        return jsonify({"msg": "Task not found"},404)
-    
+    return redirect(url_for(destination))    
     
 @app.route("/update_tasks", methods=['POST'])
 def update_tasks():
@@ -181,9 +172,13 @@ def update_tasks_completed(task_id):
 ##backend STARTS
 
 
-#GET /tasks Hämtar alla tasks. För VG: lägg till en parameter completed som kan filtrera på färdiga eller ofärdiga tasks.
 
-@app.route("/users")
+#GET /tasks Hämtar alla tasks. För VG: lägg till en parameter completed som kan filtrera på färdiga eller ofärdiga tasks.
+@jwt.unauthorized_loader
+def no_token(callback):
+    return jsonify({"msg": "Du är inte inloggad. Logga in för att kunna ta bort tasks"}), 401
+
+@app.route("/users", methods=['GET'])
 def get_users():
     users = User.query.all()
 
@@ -192,6 +187,7 @@ def get_users():
         user_list.append({"id": user.id, 'username': user.username, 'password': user.password})
     
     return jsonify({"users" : user_list})
+
 
 @app.route("/tasks", methods=['GET'])
 def get_tasks():
@@ -259,14 +255,22 @@ def load_task_by_id(task_id):
 # # DELETE /tasks/{task_id} Tar bort en task med ett specifikt id.
 
 @app.route("/tasks/<int:task_id>", methods=['DELETE'])
+@jwt_required()
 def delete_task_by_id(task_id):
-    task = Todo.query.get(task_id)
-    if task is not None:
-        db.session.delete(task)
-        db.session.commit()
-        return jsonify({"msg": "Task deleted successfully"})
+    current_user = get_jwt_identity()
+    
+    if current_user:
+        task = Todo.query.get(task_id)
+        
+        if task:
+            db.session.delete(task)
+            db.session.commit()
+            return jsonify({"msg": "Task deleted successfully"})
+        else:
+            return jsonify({"msg": "Task not found"}), 404
+            
     else:
-        return jsonify({"msg": "Task not found"}), 404
+        return jsonify({"msg": "du har inte behörighet"}), 407
 
 # # PUT /tasks/{task_id} Uppdaterar en task med ett specifikt id.
 @app.route("/tasks/<int:task_id>", methods=['PUT'])
@@ -293,6 +297,7 @@ def update_task(task_id):
 @app.route("/tasks/<int:task_id>/complete", methods=['PUT'])
 def complete_task(task_id):
     task = Todo.query.get(task_id)
+    
     if task is not None:
         task.completed = True
         db.session.commit()
@@ -324,6 +329,20 @@ def get_list_category_name(category_name):
         return jsonify(task_list)
     else:
         return jsonify({"msg": f"Could not find any with {category_name}"})
+
+@app.route("/login_user", methods=['POST'])
+def login_user():
+    bcrypt = Bcrypt()
+    username = request.form.get('username')
+    password = request.form.get('password')
+    
+    username_db = User.query.filter_by(username=username).first()
+    
+    if username and bcrypt.check_password_hash(username_db.password, password):
+        access_token = create_access_token(identity=username)
+        return jsonify({"access token": access_token})
+    else:
+        return jsonify({"msg": "wrong username or password"})
         
 
 if __name__ == "__main__":
