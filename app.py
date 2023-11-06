@@ -1,24 +1,50 @@
-from flask import Flask, request, render_template, url_for,jsonify, redirect
+from flask_session import Session
+from flask import Flask, request, session, render_template, url_for,jsonify, redirect, flash
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from datetime import datetime
 from flask_migrate import Migrate
-
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity, get_current_user    
+from flask_bcrypt import Bcrypt
+import secrets
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.db'
+secret_key = secrets.token_urlsafe(32)
 
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(32)
+#app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies']
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_TYPE'] = 'filesystem'
+
+#app.config['SECRET_KEY'] = ""
+
+Session(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+jwt = JWTManager(app)
 
+
+
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True, unique=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(120), nullable=False)
+    
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+    
+    
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(200), nullable=False)
     completed = db.Column(db.Boolean, default=False)
     categories = db.Column(db.String(200), nullable=False)
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
-    
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)  
      
     def as_dict(self):
         
@@ -35,39 +61,160 @@ class Todo(db.Model):
 
 
 #frontend
+@app.route('/logout')
+def logout_user():
+    session.clear()
+    return redirect(url_for('home_modified'))
+
+
+@app.route("/register", methods=['POST', 'GET'])
+def register_user():
+    if request.method == 'POST':
+        bcrypt = Bcrypt()
+        username = request.form.get('username')
+        password = request.form.get('password')
+        password2 = request.form.get('password2')
+
+        if not password2 == password:
+            flash("Lösenordet stämmer inte överens", "error")
+            return redirect('/register')
+        else:
+        
+            hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+            
+            new_user = User(username=username, password=hashed_password)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect('login')
+    else:
+        return render_template('register.html')
+
+
+@app.route("/login", methods=['POST', 'GET'])
+def login():
+    if request.method == "POST":
+        bcrypt = Bcrypt()
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        username_db = User.query.filter_by(username=username).first()
+
+        if username_db and bcrypt.check_password_hash(username_db.password, password):
+            session['user'] = username
+            access_token = create_access_token(identity=username)
+            return redirect(url_for('home_modified'))
+        else:
+            flash("Fel användarnamn eller lösenord. Försök igen", "error")
+            return redirect(url_for('login'))
+
+    return render_template("login.html")
+
+
+@app.route("/")
+def home():
+    tasks = Todo.query.all()
+    return render_template("base.html", tasks = tasks)
+
+@app.route("/modified")
+def home_modified():
+    tasks = Todo.query.all()
+    return render_template("modified.html", tasks = tasks)
+
+
 @app.route("/new_task", methods=['POST'])
 def new_task():
     content = request.form['content']
     completed = request.form.get('completed', False)
     categories = request.form['categories']
-    dict = { "hej": 1,
-            }
-    new_task = Todo(content=content, completed=completed, categories=categories)
-    db.session.add(new_task)
-    db.session.commit()
-    return redirect(url_for('home'))
-    
     
 
-@app.route("/")
-def home():
-    tasks = Todo.query.filter_by(completed=False).order_by(Todo.date_created.desc()).all()
-    return render_template("base.html", tasks=tasks)
+    new_task = Todo(content=content, completed=completed, categories=categories.capitalize())
+    db.session.add(new_task)
+    db.session.commit()
+
+    referrer = request.referrer
+    if referrer and referrer.endswith('/modified'):
+        destination = 'home_modified'
+    else:
+        destination = 'home'
+          
+    return redirect(url_for(destination))    
+    
+@app.route("/update_tasks", methods=['POST'])
+def update_tasks():
+    task_ids = request.form.getlist('task_ids')
+    
+   
+    for task in Todo.query.filter(Todo.id.in_(task_ids)):
+        task.completed = not task.completed
+
+    db.session.commit()
+
+    return redirect(url_for('home'))
+
+
+@app.route("/update_tasks/<int:task_id>", methods=['POST'])
+def update_tasks_completed(task_id):
+    task = Todo.query.get(task_id)
+    
+    task.completed = not task.completed
+
+    db.session.commit()
+
+    return redirect(url_for('home_modified'))
+
+
 #Frontend ends
 
 
-##backend
+
+
+##backend STARTS
+
+
 
 #GET /tasks Hämtar alla tasks. För VG: lägg till en parameter completed som kan filtrera på färdiga eller ofärdiga tasks.
-@app.route("/tasks/", methods=['GET'])
+@jwt.unauthorized_loader
+def no_token(callback):
+    return jsonify({"msg": "Du är inte inloggad. Logga in för att kunna ta bort tasks"}), 401
+
+@app.route("/users", methods=['GET'])
+def get_users():
+    users = User.query.all()
+
+    user_list = []
+    for user in users:
+        user_list.append({"id": user.id, 'username': user.username, 'password': user.password})
+    
+    return jsonify({"users" : user_list})
+
+
+@app.route("/tasks", methods=['GET'])
 def get_tasks():
-    tasks = Todo.query.all()
-    if not tasks:
-        return jsonify({"msg": "No task found."}), 404
+    completed_para = request.args.get('completed')
+    
+    if completed_para:
+        if completed_para.lower() == "false":
+            completed = False
+        elif completed_para.lower() == "true":
+            completed = True
+        else:
+            return jsonify({"msg": "ogiltig parameter för completed"}),400
+    else:
+        completed = None
+    
+    
+    if completed is not None:
+        tasks = Todo.query.filter_by(completed=completed).all()
+    else:
+        tasks = Todo.query.all()
+    
     task_list = []
+    
     for task in tasks:
         task_list.append(task.as_dict())
-    return jsonify(task_list)
+    
+    return jsonify({'tasks': task_list})
 
 
 #POST /tasks Lägger till en ny task. Tasken är ofärdig när den först läggs till.
@@ -83,7 +230,7 @@ def add_task():
     elif not data.get("categories"):
         return jsonify({"msg": "You have write in categories"})
     else:    
-        new_task = Todo(categories=categories, completed=completed, content=content)
+        new_task = Todo(completed=completed, content=content,categories=categories.capitalize())
         db.session.add(new_task)
         db.session.commit()
     
@@ -108,53 +255,55 @@ def load_task_by_id(task_id):
 # # DELETE /tasks/{task_id} Tar bort en task med ett specifikt id.
 
 @app.route("/tasks/<int:task_id>", methods=['DELETE'])
+@jwt_required()
 def delete_task_by_id(task_id):
-    task = Todo.query.get(task_id)
-    if task is not None:
-        db.session.delete(task)
-        db.session.commit()
-        return jsonify({"msg": "Task deleted successfully"})
+    current_user = get_jwt_identity()
+    
+    if current_user:
+        task = Todo.query.get(task_id)
+        
+        if task:
+            db.session.delete(task)
+            db.session.commit()
+            return jsonify({"msg": "Task deleted successfully"})
+        else:
+            return jsonify({"msg": "Task not found"}), 404
+            
     else:
-        return jsonify({"msg": "Task not found"}), 404
+        return jsonify({"msg": "du har inte behörighet"}), 407
 
 # # PUT /tasks/{task_id} Uppdaterar en task med ett specifikt id.
 @app.route("/tasks/<int:task_id>", methods=['PUT'])
 def update_task(task_id):
     task = Todo.query.get(task_id)
-    
     data = request.json
-    if 'content' in data:
-        task.content = data['content']
-    if 'categories' in data:
-        task.categories = data['categories']
-        
-    db.session.commit()
-             
-    return jsonify({
-            'id': task.id,
-            'categories': task.categories,
-            'content': task.content,
-            'completed': task.completed,
-            'date_created' : task.date_created
-    })
+    if data:
+        for key, value in data.items():
+            if key == 'categories':
+                value = value.capitalize()
+            if hasattr(task, key):
+                setattr(task, key, value)
 
-# # PUT /tasks/{task_id}/complete Markerar en task som färdig.
-
-@app.route("/tasks/<int:task_id>/completed", methods=['PUT'])
-def change_task_status(task_id):
-    task = Todo.query.get(task_id)
-    if task is not None:
-        task.completed = not task.completed  
         db.session.commit()
-        return jsonify({"msg": "Task status updated successfully"})
+             
+        return jsonify(task.as_dict())
+    else:
+        return ({"msg": "du måste skriva en nyckel och ett värde. ex. 'nyckeln': 'värdet' "})
+
+# PUT /tasks/{task_id}/complete Markerar en task som färdig.
+@app.route("/tasks/<int:task_id>/complete", methods=['PUT'])
+def complete_task(task_id):
+    task = Todo.query.get(task_id)
+    
+    if task is not None:
+        task.completed = True
+        db.session.commit()
+        return jsonify({"msg": "Task marked as completed successfully"})
     else:
         return jsonify({"msg": "Task not found"}), 404
 
 
-
-
-
-# # GET /tasks/categories/ Hämtar alla olika kategorier.
+# GET /tasks/categories/ Hämtar alla olika kategorier.
 @app.route("/tasks/categories/", methods=['GET'])
 def get_unique_categories():
     unique_categories = db.session.query(Todo.categories).distinct().all()
@@ -164,7 +313,34 @@ def get_unique_categories():
        categories_list.append(category[0])
 
     return jsonify({'unique_categories': categories_list})
+
 # GET /tasks/categories/{category_name} Hämtar alla tasks från en specifik kategori.
+@app.route("/tasks/categories/<string:category_name>", methods=['GET'])
+def get_list_category_name(category_name):
+    tasks = Todo.query.filter_by(categories=category_name).all()
+    
+    task_list = []
+    if tasks:
+        for task in tasks:
+            task_list.append(task.as_dict())
+        return jsonify(task_list)
+    else:
+        return jsonify({"msg": f"Could not find any with {category_name}"})
+
+@app.route("/login_user", methods=['POST'])
+def login_user():
+    bcrypt = Bcrypt()
+    username = request.form.get('username')
+    password = request.form.get('password')
+    
+    username_db = User.query.filter_by(username=username).first()
+    
+    if username and bcrypt.check_password_hash(username_db.password, password):
+        access_token = create_access_token(identity=username)
+        return jsonify({"access token": access_token})
+    else:
+        return jsonify({"msg": "wrong username or password"})
+        
 
 if __name__ == "__main__":
     with app.app_context():
