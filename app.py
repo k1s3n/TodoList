@@ -276,22 +276,19 @@ def delete_task_by_id(task_id):
 @app.route("/tasks/<int:task_id>", methods=['PUT'])
 def update_task(task_id):
     task = Todo.query.get(task_id)
-    
     data = request.json
-    if 'content' in data:
-        task.content = data['content']
-    if 'categories' in data:
-        task.categories = data['categories']
-        
-    db.session.commit()
+    if data:
+        for key, value in data.items():
+            if key == 'categories':
+                value = value.capitalize()
+            if hasattr(task, key):
+                setattr(task, key, value)
+
+        db.session.commit()
              
-    return jsonify({
-            'id': task.id,
-            'categories': task.categories,
-            'content': task.content,
-            'completed': task.completed,
-            'date_created' : task.date_created
-    })
+        return jsonify(task.as_dict())
+    else:
+        return ({"msg": "du måste skriva en nyckel och ett värde. ex. 'nyckeln': 'värdet' "})
 
 # PUT /tasks/{task_id}/complete Markerar en task som färdig.
 @app.route("/tasks/<int:task_id>/complete", methods=['PUT'])
