@@ -120,25 +120,6 @@ def home_modified():
     tasks = Todo.query.all()
     return render_template("modified.html", tasks = tasks)
 
-
-@app.route("/new_task", methods=['POST'])
-def new_task():
-    content = request.form['content']
-    completed = request.form.get('completed', False)
-    categories = request.form['categories']
-    
-
-    new_task = Todo(content=content, completed=completed, categories=categories.capitalize())
-    db.session.add(new_task)
-    db.session.commit()
-
-    referrer = request.referrer
-    if referrer and referrer.endswith('/modified'):
-        destination = 'home_modified'
-    else:
-        destination = 'home'
-          
-    return redirect(url_for(destination))    
     
 @app.route("/update_tasks", methods=['POST'])
 def update_tasks():
@@ -176,7 +157,7 @@ def update_tasks_completed(task_id):
 #GET /tasks Hämtar alla tasks. För VG: lägg till en parameter completed som kan filtrera på färdiga eller ofärdiga tasks.
 @jwt.unauthorized_loader
 def no_token(callback):
-    return jsonify({"msg": "Du är inte inloggad. Logga in för att kunna ta bort tasks"}), 401
+    return jsonify({"msg": "Du har inte behörighet"}), 401
 
 @app.route("/users", methods=['GET'])
 def get_users():
@@ -220,21 +201,27 @@ def get_tasks():
 #POST /tasks Lägger till en ny task. Tasken är ofärdig när den först läggs till.
 @app.route("/tasks", methods=['POST'])
 def add_task():
-    data = request.json
-    content = data.get("content")
-    completed = data.get("completed", False)
-    categories = data.get("categories")
-    
-    if not data.get("content"):
-        return jsonify({"msg": "You have write in content"})
-    elif not data.get("categories"):
-        return jsonify({"msg": "You have write in categories"})
-    else:    
-        new_task = Todo(completed=completed, content=content,categories=categories.capitalize())
+    content = request.form['content']
+    completed = request.form.get('completed', False)
+    categories = request.form['categories']
+    referrer = request.referrer
+        
+    if not content:
+        flash("Du måste lägga till task", "error")
+    elif not categories:
+        flash("Du måste lägga till categories", "error")
+        return redirect(url_for('home'))
+    else:
+        new_task = Todo(content=content, completed=completed, categories=categories.capitalize())
         db.session.add(new_task)
         db.session.commit()
-    
-    return jsonify({"msg": "Task added! "})
+   
+    if referrer and referrer.endswith('/modified'):
+        destination = 'home_modified'
+    else:
+        destination = 'home'    
+              
+    return redirect(url_for(destination))    
 
 
 # GET /tasks/{task_id} Hämtar en task med ett specifikt id.
