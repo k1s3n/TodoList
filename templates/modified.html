@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ToDo List{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    
+    {% block content %}
+    <div class="table-container">
+    <table class="list-table">
+        <tr>
+            {% if 'user' in session %}
+                <td colspan="3">Välkommen, {{ session['user'] }}!</td>
+                <td>
+                    <a class="futuristic-links" href="/logout">Logout</a>
+                </td>
+            {% else %}
+            <div class="links">
+                <td colspan="3">
+                    | <a class="futuristic-links" href="/modified">Todo List</a> |
+                    <a class="futuristic-links" href="/register">Register</a> |
+                    <a class="futuristic-links" href="/login">Login</a> |
+                </td>
+            </div>
+            {% endif %}
+        </tr>
+        <tr>
+            <th colspan="4"><h2>ToDo List</h2></th>
+        </tr>
+        {% if 'user' not in session%}
+        <td colspan="4">Du måste <a href="register">registrera</a> dig eller <a href="/login">logga in<a> för att se eller skapa Todo lista</d>
+        {% elif tasks %}
+        
+        <tr>
+            <form id ="MyForm" method="POST" action="/new_task">
+                <th></th>
+                <th><input type="text" name="content" placeholder="Task..." required></th>
+                <th><input type="text" name="categories" placeholder="Category..." required></th>
+                <th><button type="submit" class="addBtn">Add</button></td>
+                </form>
+        </tr>
+        <tr>
+            <th>Tasks</1th>
+            <th>Category</th>
+            <th>Date Created</th>
+            <th>
+            </th>
+        </tr>
+       
+        
+            {% for task in tasks %}
+                {% if not task.completed%}
+                    <tr class="list-item">
+                        <td>{{ task.content }}</td>
+                        <td>{{ task.categories }}</td>
+                        <td>{{ task.date_created }}</td>
+                        <td>
+                            <form method="POST" action="/update_tasks/{{ task.id }}" class="updateBtn">
+                                <button type="submit" class="updateBtn">Complete</button>
+                            </form>
+                        </td>
+                    </tr>
+
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        {%if 'user' not in session%}
+        {%else%}
+        <tr>
+            <th>Tasks Completed</1th>
+            <th>Category</th>
+            <th>Date Created</th>
+            <th></th>
+        </tr>
+        {% for task in tasks %}
+        {% if task.completed%}
+        <tr class="list-item">
+            <td>{{ task.content }}</td>
+            <td>{{ task.categories }}</td>
+            <td>{{ task.date_created }}</td>
+            <form method="POST" action="/update_tasks/{{ task.id }}" class="updateBtn">
+            <td><button type="submit" class="updateBtn">Undo</button></td>
+                </form>
+        </tr>
+        
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+    </table>
+
+    
+
+
+
+
+<!--
+    <ul class="list_clean">
+        <li class="input">
+            <form id ="MyForm" method="POST" action="/new_task">
+                <span class="header-item"><h3>Todo List</h3></span>
+                <span class="header-item"><input type="text" name="content" placeholder="Task..." required></span>
+                <span class="header-item"><input type="text" name="categories" placeholder="Category..." required></span>
+                <button type="submit" class="addBtn">Add</button>
+            </form>
+        </li>
+        <li class="list-header">
+            <span class="header-item">Tasks Pending</span>
+            <span class="header-item">Category</span>
+            <span class="header-item">Tid</span>
+        </li>
+        {% for task in tasks %}
+        {% if not task.completed %}
+        <li class="list-item">
+            <span class="item">{{ task.content }}</span>
+            <span class="item">{{ task.categories }}</span>
+            <span class="item">{{ task.date_created}}</span>
+            <form method="POST" action="/update_tasks/{{ task.id }}" class="updateBtn">
+            <button type="submit" class="updateBtn">Complete</button>
+            </form>
+            <form method="POST" action="/delete_task/{{ task.id }}">
+            <button type="submit">Delete</button>
+            </form>
+        </li>
+    
+        {% endif %}
+        {% endfor %}
+    </ul>
+
+
+    <ul class="list_clean">
+        <li class="list-header">
+            <span class="header-item">Tasks Completed</span>
+            <span class="header-item">Category</span>
+            <span class="header-item">Tid</span>
+        </li>
+        {% for task in tasks %}
+        {% if task.completed %}
+        <li class="list-item">
+            <span class="item">{{ task.content }}</span>
+            <span class="item">{{ task.categories }}</span>
+            <span class="item">{{ task.date_created}}</span>
+            <form method="POST" action="/update_tasks/{{ task.id }}" class="updateBtn">
+            <button type="submit" class="updateBtn">Uncomplete</button>
+        </li>
+    </form>
+        {% endif %}
+        {% endfor %}
+    </ul>
+-->
+    {% endblock %}
+</body>
+</html>

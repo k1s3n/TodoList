@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Login{% endblock %}</title>
+    
+</head>
+<body>
+    {% block content %}
+    <div class="table-container">
+        <table class="list-table">
+            <thead>
+                <tr>
+                    {% if 'user' in session %}
+                        <td colspan="3">Välkommen, {{ session['user'] }}!</td>
+                            
+                            <a class="futuristic-links" href="/modified">Todo List</a>
+                            <a class="futuristic-links" href="/logout">Logout</a>
+                        </td>
+                    {% else %}
+                    <div class="links">
+                        <td colspan="3">
+                        | <a class="futuristic-links" href="/modified">Todo List</a> |
+                        <a class="futuristic-links" href="/register">Register</a> |
+                        <a class="futuristic-links" href="/login">Login</a> |
+                        </td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <th colspan="4"><h2>Login</h2></th>
+                </tr>
+
+                <tr>
+                    <td>
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <ul class="flash-messages">
+                                {% for category, message in messages %}
+                                    <li class="{{ category }}">{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% endwith %}
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                    <form id="MyForm" method="POST" action="/login">
+                        <td colspan="4">
+                            <input type="text" name="username" placeholder="username..." required>
+                            <input type="password" name="password" placeholder="password..." required>
+                            <button type="submit" class="addBtn">Login</button>
+                        </td>
+                    </form>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endblock %}
+</body>
+</html>

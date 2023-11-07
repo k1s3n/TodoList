@@ -2,11 +2,19 @@
 <html lang="en">
 
 <head>
-    
+    <nav>
+                <a href="/">Home</a>
+                <a href="/modified">Modified</a>
+                
+</nav>
+
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ToDo List{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+    </style>
 </head>
 <body>
     {% block content %}
@@ -21,13 +29,42 @@
         <nav></nav>
 
     </div>
-        <ol >
-            {%for task in tasks%}
-            <li>{{task.content}}</li>
-            {%endfor%}
-        </ol>
+    
+    </label>
+    <div class="header">
+        <h3>Tasks</h3>
+    </div>
+    
+    <form method="POST" action="/update_tasks">
+        <ul class="list_clean">
+            {% for task in tasks %}
+            {% if not task.completed %}
+            <li>
+                <input type="checkbox" id="task_{{ task.id }}" name="task_ids" value="{{ task.id }}">
+                <label for="task_{{ task.id }}">{{ task.content }}</label>
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+        <button type="submit" class="updateBtn">Complete Task</button>
+    </form>
+    
+    
+    <h3>Completed Tasks</h3>
+    <form method="POST" action="/update_tasks">
+    <ul class="list_clean">
+        {% for task in tasks %}
+        {% if task.completed %}
+        <li>
+            <input type="checkbox" id="task_{{ task.id }}" name="task_ids" value="{{ task.id }}">
+            <label for="task_{{ task.id }}">{{ task.content }}</label>
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+    <button type="submit" class="updateBtn">Reverse Task</button>
+    </form>
+    
     {% endblock %}
-
-  </body>
-
+</body>
 </html>
