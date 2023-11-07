@@ -42,15 +42,20 @@
                 <th><input type="text" name="categories" placeholder="Category..." required></th>
                 <th><button type="submit" class="addBtn">Add</button></td>
                 </form>
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <ul class="flash-messages">
-                        {% for category, message in messages %}
-                            <li class="{{ category }}">{{ message }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-                {% endwith %}
+                <tr>
+                    <th colspan="4">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <ol class="flash-messages">
+                                {% for category, message in messages %}
+                                    <li class="{{ category }}">{{ message }}</li>
+                                {% endfor %}
+                            </ol>
+                        {% endif %}
+                        {% endwith %}
+                    </th>
+        </tr>
+        
         </tr>
         <tr>
             <th>Tasks</1th>

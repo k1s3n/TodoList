@@ -207,9 +207,9 @@ def add_task():
     referrer = request.referrer
         
     if not content:
-        flash("Du måste lägga till task", "error")
+        flash("Du måste lägga till task", "info")
     elif not categories:
-        flash("Du måste lägga till categories", "error")
+        flash("Du måste lägga till categories", "info")
         return redirect(url_for('home'))
     else:
         new_task = Todo(content=content, completed=completed, categories=categories.capitalize())
@@ -217,8 +217,10 @@ def add_task():
         db.session.commit()
    
     if referrer and referrer.endswith('/modified'):
+        flash("Uppgiften tillagd", "info")
         destination = 'home_modified'
     else:
+        flash("Uppgiften tillagd", "info")
         destination = 'home'    
               
     return redirect(url_for(destination))    
