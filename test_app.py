@@ -3,23 +3,15 @@ import pytest
 from app import app, db, Todo
 
 @pytest.fixture
-def client(request):
+def client():
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test_task.db'
-    with app.app_context():
+    with app.app_context():  # Skapa applikationskontext
         db.create_all()
-
     with app.test_client() as client:
         yield client
-
-    
-    def finalizer():
-        with app.app_context():
-            db.drop_all()
-
-    request.addfinalizer(finalizer)
-
-
+    with app.app_context():  # Avsluta applikationskontext
+        db.drop_all()
 
 def test_home_route(client):
     with app.app_context():
@@ -59,13 +51,11 @@ def test_delete_task_by_id(client):
         task = Todo(content="Test task", completed=False, categories="Test category")
         db.session.add(task)
         db.session.commit()
-
     with app.app_context():
         response = client.delete('/tasks/1')
         assert response.status_code == 200
         data = json.loads(response.data.decode('utf-8'))
         assert data['msg'] == "Task deleted successfully"
-
     # Kontrollera att tasken har tagits bort från databasen
     with app.app_context():
         deleted_task = Todo.query.get(1)
@@ -77,7 +67,6 @@ def test_update_task(client):
         task = Todo(content="Test task", completed=False, categories="Test category")
         db.session.add(task)
         db.session.commit()
-
     new_data = {
         "content": "Updated task",
         "categories": "Updated category"
@@ -88,7 +77,6 @@ def test_update_task(client):
     data = json.loads(response.data.decode('utf-8'))
     assert data['content'] == "Updated task"
     assert data['categories'] == "Updated category"
-
     # Kontrollera att tasken har uppdaterats i databasen
     with app.app_context():
         updated_task = Todo.query.get(1)
@@ -101,13 +89,11 @@ def test_complete_task(client):
         task = Todo(content="Test task", completed=False, categories="Test category")
         db.session.add(task)
         db.session.commit()
-
     with app.app_context():
         response = client.put('/tasks/1/complete')
     assert response.status_code == 200
     data = json.loads(response.data.decode('utf-8'))
     assert data['msg'] == "Task marked as completed successfully"
-
     # Kontrollera att tasken är markerad som slutförd i databasen
     with app.app_context():
         completed_task = Todo.query.get(1)
@@ -123,22 +109,21 @@ def test_get_unique_categories(client):
         db.session.add(category2)
         db.session.add(category3)
         db.session.commit()
-
     # Gör förfrågan för att hämta unika kategorier
     with app.app_context():
         response = client.get('/tasks/categories/')
     data = json.loads(response.data)
     assert response.status_code == 200
+    # Ange de förväntade kategorierna här
     expected_categories = ['Category1', 'Category2', 'Category3']
     assert data['unique_categories'] == expected_categories
-
-
+    
 def test_get_list_category_name(client):
     with app.app_context():
         response = client.get('/tasks/categories/Category1')
     data = json.loads(response.data)
     assert response.status_code == 200
-    
+    # Ange de förväntade uppgifterna som du har lagt till i kategorin 'Category1'.
 
 
 #API-Tester
@@ -146,7 +131,7 @@ def test_add_task_invalid_data(client):
     # Testar att försöka lägga till en uppgift med ogiltiga data (t.ex. saknas content eller categories).
     with app.app_context():
         response = client.post('/new_task', data={'content': '', 'categories': ''})
-    assert response.status_code == 302  
+    assert response.status_code == 302  # Förväntar oss en felkod 400 (Bad Request)
 
 def test_add_task_missing_data(client):
     # Testar att försöka lägga till en uppgift utan att skicka med nödvändig data.
@@ -169,6 +154,5 @@ def test_delete_invalid_task_id(client):
 def test_update_invalid_task_id(client):
     # Testa att försöka uppdatera en uppgift med en ogiltig ID.
     with app.app_context():
-        response = client.put('/tasks/999', data=json.dumps({"": ""}), content_type='application/json')
+        response = client.put('/tasks/999', data=json.dumps({"content": "Updated task"}), content_type='application/json')
     assert response.status_code == 404  # Förväntar oss en felkod 404 (Not Found)
-
