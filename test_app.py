@@ -132,3 +132,36 @@ def test_get_list_category_name(client):
     data = json.loads(response.data)
     assert response.status_code == 200
     # Ange de förväntade uppgifterna som du har lagt till i kategorin 'Category1'.
+
+
+#API-Tester
+def test_add_task_invalid_data(client):
+    # Testar att försöka lägga till en uppgift med ogiltiga data (t.ex. saknas content eller categories).
+    with app.app_context():
+        response = client.post('/new_task', data={'content': '', 'categories': ''})
+    assert response.status_code == 302  # Förväntar oss en felkod 400 (Bad Request)
+
+def test_add_task_missing_data(client):
+    # Testar att försöka lägga till en uppgift utan att skicka med nödvändig data.
+    with app.app_context():
+        response = client.post('/new_task', data={})
+    assert response.status_code == 400  # Förväntar oss en felkod 400 (Bad Request)
+
+def test_load_invalid_task_id(client):
+    # Testar att försöka hämta en uppgift med en ogiltig ID.
+    with app.app_context():
+        response = client.get('/tasks/999')  
+    assert response.status_code == 404  # Förväntar oss en felkod 404 (Not Found)
+
+def test_delete_invalid_task_id(client):
+    # Testa att försöka ta bort en uppgift med en ogiltig ID.
+    with app.app_context():
+        response = client.delete('/tasks/999')  # Antag att ID 999 inte finns.
+    assert response.status_code == 404  # Förväntar oss en felkod 404 (Not Found)
+
+def test_update_invalid_task_id(client):
+    # Testa att försöka uppdatera en uppgift med en ogiltig ID.
+    with app.app_context():
+        response = client.put('/tasks/999', data=json.dumps({"content": "Updated task"}), content_type='application/json')
+    assert response.status_code == 404  # Förväntar oss en felkod 404 (Not Found)
+
