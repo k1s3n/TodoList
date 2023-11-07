@@ -36,12 +36,21 @@
         {% elif tasks %}
         
         <tr>
-            <form id ="MyForm" method="POST" action="/new_task">
+            <form id ="MyForm" method="POST" action="/tasks">
                 <th></th>
                 <th><input type="text" name="content" placeholder="Task..." required></th>
                 <th><input type="text" name="categories" placeholder="Category..." required></th>
                 <th><button type="submit" class="addBtn">Add</button></td>
                 </form>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flash-messages">
+                        {% for category, message in messages %}
+                            <li class="{{ category }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% endwith %}
         </tr>
         <tr>
             <th>Tasks</1th>
