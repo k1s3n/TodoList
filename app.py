@@ -6,12 +6,16 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity, get_current_user    
 from flask_bcrypt import Bcrypt
 import secrets
+import os
 
 app = Flask(__name__)
 secret_key = secrets.token_urlsafe(32)
 
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.db'
+if 'TESTING' in os.environ:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test_task.db' # Skriv Remove-Item Env:\TESTING i terminalen för att komma in här
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.db' # skriv $env:TESTING = "true" i terminalen för att komma in på denna databas
+    
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(32)
 #app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies']
@@ -331,5 +335,5 @@ def login_user():
 
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()
-    app.run(debug=True)
+        #db.create_all()
+        app.run(debug=True)
