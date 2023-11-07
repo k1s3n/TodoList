@@ -6,11 +6,26 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity, get_current_user    
 from flask_bcrypt import Bcrypt
 import secrets
+from config import TestConfig
 
 app = Flask(__name__)
+app.config.from_pyfile('config.py')  # Load the regular configuration
+if app.config['TESTING']:
+    app.config.from_pyfile('test_config.py')  
+app.config.from_object(TestConfig)
+
 secret_key = secrets.token_urlsafe(32)
 
+def create_app(config_class=Config):
+    app = Flask(__name__)
 
+    # Load the application configuration from your config file
+    app.config.from_object(config_class)
+
+    # Initialize database with the Flask app
+    db.init_app(app)
+
+    # Import and register your blueprints, configure authentication, etc
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(32)

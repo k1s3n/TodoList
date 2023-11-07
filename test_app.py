@@ -1,24 +1,16 @@
 import json
 import pytest
-from app import app, db, Todo
+from app import create_app, db, Todo
 
 @pytest.fixture
-def client(request):
+def app():
+    app = create_app()  # Replace with how you create your Flask app
     app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test_task.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
     with app.app_context():
         db.create_all()
-
-    with app.test_client() as client:
-        yield client
-
-    
-    def finalizer():
-        with app.app_context():
-            db.drop_all()
-
-    request.addfinalizer(finalizer)
-
+        yield app
+    db.drop_all()
 
 
 def test_home_route(client):
