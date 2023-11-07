@@ -21,13 +21,21 @@
     <div>
         <h2>My To Do List</h2>
 
-        <form id ="MyForm" method="POST" action="/new_task">
+        <form id ="MyForm" method="POST" action="/tasks">
             <input type="text" name="content" placeholder="Task..." required>
             <input type="text" name="categories" placeholder="Category..." required>
             <button type="submit" class="addBtn">Add</button>
         </form>
         <nav></nav>
-
+        {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flash-messages">
+                        {% for category, message in messages %}
+                            <li class="{{ category }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% endwith %}
     </div>
     
     </label>
@@ -48,6 +56,7 @@
         </ul>
         <button type="submit" class="updateBtn">Complete Task</button>
     </form>
+    
     
     
     <h3>Completed Tasks</h3>
