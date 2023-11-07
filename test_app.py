@@ -3,15 +3,23 @@ import pytest
 from app import app, db, Todo
 
 @pytest.fixture
-def client():
+def client(request):
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test_task.db'
-    with app.app_context():  # Skapa applikationskontext
+    with app.app_context():
         db.create_all()
+
     with app.test_client() as client:
         yield client
-    with app.app_context():  # Avsluta applikationskontext
-        db.drop_all()
+
+    
+    def finalizer():
+        with app.app_context():
+            db.drop_all()
+
+    request.addfinalizer(finalizer)
+
+
 
 def test_home_route(client):
     with app.app_context():
@@ -121,7 +129,6 @@ def test_get_unique_categories(client):
         response = client.get('/tasks/categories/')
     data = json.loads(response.data)
     assert response.status_code == 200
-    # Ange de förväntade kategorierna här
     expected_categories = ['Category1', 'Category2', 'Category3']
     assert data['unique_categories'] == expected_categories
 
@@ -131,7 +138,7 @@ def test_get_list_category_name(client):
         response = client.get('/tasks/categories/Category1')
     data = json.loads(response.data)
     assert response.status_code == 200
-    # Ange de förväntade uppgifterna som du har lagt till i kategorin 'Category1'.
+    
 
 
 #API-Tester
@@ -139,7 +146,7 @@ def test_add_task_invalid_data(client):
     # Testar att försöka lägga till en uppgift med ogiltiga data (t.ex. saknas content eller categories).
     with app.app_context():
         response = client.post('/new_task', data={'content': '', 'categories': ''})
-    assert response.status_code == 302  # Förväntar oss en felkod 400 (Bad Request)
+    assert response.status_code == 302  
 
 def test_add_task_missing_data(client):
     # Testar att försöka lägga till en uppgift utan att skicka med nödvändig data.
@@ -162,6 +169,6 @@ def test_delete_invalid_task_id(client):
 def test_update_invalid_task_id(client):
     # Testa att försöka uppdatera en uppgift med en ogiltig ID.
     with app.app_context():
-        response = client.put('/tasks/999', data=json.dumps({"content": "Updated task"}), content_type='application/json')
+        response = client.put('/tasks/999', data=json.dumps({"": ""}), content_type='application/json')
     assert response.status_code == 404  # Förväntar oss en felkod 404 (Not Found)
 
