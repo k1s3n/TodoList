@@ -1,31 +1,36 @@
 import json
+import os
+import shutil
 import pytest
 from app import app, db, Todo
 
+
+    # Kopiera task.db till test_task.db
+shutil.copy("instance/task.db", "instance/test_task.db")
+
+# Fixtur för att sätta upp testmiljön och ta bort test_task.db efter tester är klara
 @pytest.fixture
 def client(request):
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test_task.db'
+    
+    
     with app.app_context():
         db.create_all()
-
+        
     with app.test_client() as client:
         yield client
-
-    
-    def finalizer():
-        with app.app_context():
-            db.drop_all()
-
-    request.addfinalizer(finalizer)
-
-
+          # Ta bort testdatabasen
+    #os.remove("instance/test_task.db")
+# Testfall
 
 def test_home_route(client):
+    # Testfall för att visa startsidan
     with app.app_context():
         response = client.get('/')
-    assert response.status_code == 200
-    assert b"My To Do List" in response.data
+        assert response.status_code == 200
+        assert b"My To Do List" in response.data
+
+
+    
 
 def test_add_task(client):
     with app.app_context():
@@ -37,7 +42,7 @@ def test_add_task(client):
         assert tasks[0].content == 'Test task'
         assert tasks[0].categories == 'Test category'
 
-def test_load_task_by_id(client):
+def test_load_task_by_id(client, testing_environment):
     # Lägg till en task i databasen för att testa
     with app.app_context():
         task = Todo(content="Test task", completed=False, categories="Test category")
@@ -65,6 +70,7 @@ def test_delete_task_by_id(client):
         assert response.status_code == 200
         data = json.loads(response.data.decode('utf-8'))
         assert data['msg'] == "Task deleted successfully"
+        
 
     # Kontrollera att tasken har tagits bort från databasen
     with app.app_context():
@@ -171,4 +177,6 @@ def test_update_invalid_task_id(client):
     with app.app_context():
         response = client.put('/tasks/999', data=json.dumps({"": ""}), content_type='application/json')
     assert response.status_code == 404  # Förväntar oss en felkod 404 (Not Found)
+
+#Ta bort "test_task.db" när testerna är klara
 

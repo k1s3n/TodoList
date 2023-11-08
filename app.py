@@ -6,11 +6,16 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity, get_current_user    
 from flask_bcrypt import Bcrypt
 import secrets
+import os
+import shutil
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 
 app = Flask(__name__)
 secret_key = secrets.token_urlsafe(32)
-
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(32)
@@ -18,8 +23,10 @@ app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(32)
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_TYPE'] = 'filesystem'
 
-#app.config['SECRET_KEY'] = ""
-
+if os.environ['TESTING'] == "true":
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test_task.db'
+    
+print(app.config["SQLALCHEMY_DATABASE_URI"])
 Session(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -113,6 +120,7 @@ def login():
 @app.route("/")
 def home():
     tasks = Todo.query.all()
+    print(tasks)
     return render_template("base.html", tasks = tasks)
 
 @app.route("/modified")
@@ -332,4 +340,4 @@ def login_user():
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+        app.run(debug=True)
