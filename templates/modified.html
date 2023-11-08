@@ -33,7 +33,7 @@
         </tr>
         {% if 'user' not in session%}
         <td colspan="4">Du måste <a href="register">registrera</a> dig eller <a href="/login">logga in<a> för att se eller skapa Todo lista</d>
-        {% elif tasks %}
+        {%else%}
         
         <tr>
             <form id ="MyForm" method="POST" action="/tasks">
@@ -51,6 +51,7 @@
                     </ul>
                 {% endif %}
                 {% endwith %}
+            
         </tr>
         <tr>
             <th>Tasks</1th>
@@ -60,7 +61,10 @@
             </th>
         </tr>
        
-        
+            {% if not tasks%}
+                <td colspan="4">Du har inga tasks</td>
+            {% endif%}
+            
             {% for task in tasks %}
                 {% if not task.completed%}
                     <tr class="list-item">
@@ -85,6 +89,7 @@
             <th>Date Created</th>
             <th></th>
         </tr>
+        
         {% for task in tasks %}
         {% if task.completed%}
         <tr class="list-item">
