@@ -7,12 +7,9 @@ from flask_jwt_extended import JWTManager, jwt_required, create_access_token, ge
 from flask_bcrypt import Bcrypt
 import secrets
 import os
-import shutil
 from dotenv import load_dotenv
 
 load_dotenv()
-
-
 
 app = Flask(__name__)
 secret_key = secrets.token_urlsafe(32)
