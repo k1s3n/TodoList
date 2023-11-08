@@ -1,15 +1,11 @@
 import json
-import os
 import shutil
 import pytest
-from sqlalchemy.orm import Session
-from app import app, db, Todo, login_user, User
+from app import app, db, Todo
 
-
-    # Kopiera task.db till test_task.db
 shutil.copy("instance/task.db", "instance/test_task.db")
 
-# Fixtur för att sätta upp testmiljön och ta bort test_task.db efter tester är klara
+
 @pytest.fixture
 def client(request): 
     with app.app_context():
@@ -22,7 +18,7 @@ def client(request):
          db.drop_all()
 
 def test_home_route(client):
-    # Testfall för att visa startsidan
+    
     with app.app_context():
         response = client.get('/')
         assert response.status_code == 200
@@ -193,12 +189,10 @@ def test_delete_invalid_task_id(client):
     # Testa att försöka ta bort en uppgift med en ogiltig ID utan token.
     with app.app_context():
         response = client.delete('/tasks/999')  # Antag att ID 999 inte finns.
-    assert response.status_code == 401  # Förväntar oss en felkod 404 (Not Found)
-
+    assert response.status_code == 401  
 def test_update_invalid_task_id(client):
     # Testa att försöka uppdatera en uppgift med en ogiltig ID.
     with app.app_context():
         response = client.put('/tasks/999', data=json.dumps({"content": "Golvet", "categories": "Städa"}), content_type='application/json')
-    assert response.status_code == 404  # Förväntar oss en felkod 404 (Not Found)
-
+    assert response.status_code == 404  
 
