@@ -11,7 +11,7 @@ shutil.copy("instance/task.db", "instance/test_task.db")
 @pytest.fixture()
 def client(request):
 
-    # Modify the TESTING environment variable
+    
     with app.app_context():
         db.create_all()
         
@@ -88,7 +88,7 @@ def test_delete_task_by_id_authorized(client):
     # Logga in med den skapade användaren
     login_data = {"username": 'testuser', "password": 'testpassword'}
     login_response = client.post('/login_user', data=login_data)
-    assert login_response.status_code == 200  # Förväntad statuskod för en lyckad inloggning
+    assert login_response.status_code == 200  
     
     access_token = login_response.json['access_token']
     
@@ -180,18 +180,18 @@ def test_add_task_missing_data(client):
     # Testar att försöka lägga till en uppgift utan att skicka med nödvändig data.
     with app.app_context():
         response = client.post('/tasks', data={})
-    assert response.status_code == 400  # Förväntar oss en felkod 400 (Bad Request)
+    assert response.status_code == 400  
 
 def test_load_invalid_task_id(client):
     # Testar att försöka hämta en uppgift med en ogiltig ID.
     with app.app_context():
         response = client.get('/tasks/999')  
-    assert response.status_code == 404  # Förväntar oss en felkod 404 (Not Found)
+    assert response.status_code == 404  
 
 def test_delete_invalid_task_id(client):
     # Testa att försöka ta bort en uppgift med en ogiltig ID utan token.
     with app.app_context():
-        response = client.delete('/tasks/999')  # Antag att ID 999 inte finns.
+        response = client.delete('/tasks/999') 
     assert response.status_code == 401  
 def test_update_invalid_task_id(client):
     # Testa att försöka uppdatera en uppgift med en ogiltig ID.

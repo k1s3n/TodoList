@@ -16,7 +16,6 @@ secret_key = secrets.token_urlsafe(32)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(32)
-#app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies']
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_TYPE'] = 'filesystem'
 
