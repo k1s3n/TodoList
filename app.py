@@ -7,12 +7,9 @@ from flask_jwt_extended import JWTManager, jwt_required, create_access_token, ge
 from flask_bcrypt import Bcrypt
 import secrets
 import os
-import shutil
 from dotenv import load_dotenv
 
 load_dotenv()
-
-
 
 app = Flask(__name__)
 secret_key = secrets.token_urlsafe(32)
@@ -235,7 +232,7 @@ def add_task():
 # GET /tasks/{task_id} Hämtar en task med ett specifikt id.
 @app.route("/tasks/<int:task_id>", methods=['GET'])
 def load_task_by_id(task_id):
-    task = Todo.query.get(task_id)
+    task = db.session.get(Todo, task_id)
     if task is not None:
         return jsonify({
             'id': task.id,
@@ -254,8 +251,10 @@ def load_task_by_id(task_id):
 def delete_task_by_id(task_id):
     current_user = get_jwt_identity()
     
-    if current_user:
-        task = Todo.query.get(task_id)
+    if not current_user:
+        return jsonify({"msg": "Du har inte behörighet"}), 401
+    else:
+        task = db.session.get(Todo, task_id)
         
         if task:
             db.session.delete(task)
@@ -263,15 +262,15 @@ def delete_task_by_id(task_id):
             return jsonify({"msg": "Task deleted successfully"})
         else:
             return jsonify({"msg": "Task not found"}), 404
-            
-    else:
-        return jsonify({"msg": "du har inte behörighet"}), 407
+        
 
 # # PUT /tasks/{task_id} Uppdaterar en task med ett specifikt id.
 @app.route("/tasks/<int:task_id>", methods=['PUT'])
 def update_task(task_id):
-    task = Todo.query.get(task_id)
+    task = db.session.get(Todo, task_id)
     data = request.json
+    if not task:
+        return ({"msg" : "Task id du angav kan ej hittas"}),404
     if data:
         for key, value in data.items():
             if key == 'categories':
@@ -288,7 +287,7 @@ def update_task(task_id):
 # PUT /tasks/{task_id}/complete Markerar en task som färdig.
 @app.route("/tasks/<int:task_id>/complete", methods=['PUT'])
 def complete_task(task_id):
-    task = Todo.query.get(task_id)
+    task = db.session.get(Todo, task_id)
     
     if task is not None:
         task.completed = True
@@ -332,7 +331,7 @@ def login_user():
     
     if username and bcrypt.check_password_hash(username_db.password, password):
         access_token = create_access_token(identity=username)
-        return jsonify({"access token": access_token})
+        return jsonify({"access_token": access_token})
     else:
         return jsonify({"msg": "wrong username or password"})
         

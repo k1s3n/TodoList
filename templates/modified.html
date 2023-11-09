@@ -32,8 +32,8 @@
             <th colspan="4"><h2>ToDo List</h2></th>
         </tr>
         {% if 'user' not in session%}
-        <td colspan="4">Du måste <a href="register">registrera</a> dig eller <a href="/login">logga in<a> för att se eller skapa Todo lista</d>
-        {% elif tasks %}
+        <td colspan="4">Du måste <a href="register">registrera</a> dig eller <a href="/login">logga in</a> för att se eller skapa Todo lista</td>
+        {%else%}
         
         <tr>
             <form id ="MyForm" method="POST" action="/tasks">
@@ -51,6 +51,7 @@
                     </ul>
                 {% endif %}
                 {% endwith %}
+            
         </tr>
         <tr>
             <th>Tasks</1th>
@@ -59,10 +60,10 @@
             <th>
             </th>
         </tr>
-       
-        
             {% for task in tasks %}
+            
                 {% if not task.completed%}
+                
                     <tr class="list-item">
                         <td>{{ task.content }}</td>
                         <td>{{ task.categories }}</td>
@@ -85,6 +86,7 @@
             <th>Date Created</th>
             <th></th>
         </tr>
+        
         {% for task in tasks %}
         {% if task.completed%}
         <tr class="list-item">
@@ -100,66 +102,11 @@
         {% endfor %}
         {% endif %}
     </table>
-
-    
-
+   
 
 
 
-<!--
-    <ul class="list_clean">
-        <li class="input">
-            <form id ="MyForm" method="POST" action="/new_task">
-                <span class="header-item"><h3>Todo List</h3></span>
-                <span class="header-item"><input type="text" name="content" placeholder="Task..." required></span>
-                <span class="header-item"><input type="text" name="categories" placeholder="Category..." required></span>
-                <button type="submit" class="addBtn">Add</button>
-            </form>
-        </li>
-        <li class="list-header">
-            <span class="header-item">Tasks Pending</span>
-            <span class="header-item">Category</span>
-            <span class="header-item">Tid</span>
-        </li>
-        {% for task in tasks %}
-        {% if not task.completed %}
-        <li class="list-item">
-            <span class="item">{{ task.content }}</span>
-            <span class="item">{{ task.categories }}</span>
-            <span class="item">{{ task.date_created}}</span>
-            <form method="POST" action="/update_tasks/{{ task.id }}" class="updateBtn">
-            <button type="submit" class="updateBtn">Complete</button>
-            </form>
-            <form method="POST" action="/delete_task/{{ task.id }}">
-            <button type="submit">Delete</button>
-            </form>
-        </li>
-    
-        {% endif %}
-        {% endfor %}
-    </ul>
 
-
-    <ul class="list_clean">
-        <li class="list-header">
-            <span class="header-item">Tasks Completed</span>
-            <span class="header-item">Category</span>
-            <span class="header-item">Tid</span>
-        </li>
-        {% for task in tasks %}
-        {% if task.completed %}
-        <li class="list-item">
-            <span class="item">{{ task.content }}</span>
-            <span class="item">{{ task.categories }}</span>
-            <span class="item">{{ task.date_created}}</span>
-            <form method="POST" action="/update_tasks/{{ task.id }}" class="updateBtn">
-            <button type="submit" class="updateBtn">Uncomplete</button>
-        </li>
-    </form>
-        {% endif %}
-        {% endfor %}
-    </ul>
--->
     {% endblock %}
 </body>
 </html>
