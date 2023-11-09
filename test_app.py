@@ -1,13 +1,17 @@
 import json
 import shutil
+import os
 import pytest
 from app import app, db, Todo
+import pytest_dotenv
+
 
 shutil.copy("instance/task.db", "instance/test_task.db")
 
+@pytest.fixture()
+def client(request):
 
-@pytest.fixture
-def client(request): 
+    # Modify the TESTING environment variable
     with app.app_context():
         db.create_all()
         
@@ -16,7 +20,7 @@ def client(request):
 
     with app.app_context():
          db.drop_all()
-
+    
 def test_home_route(client):
     
     with app.app_context():
@@ -26,7 +30,6 @@ def test_home_route(client):
 
 
     
-
 def test_add_task(client):
     with app.app_context():
         response = client.post('/tasks', data={'content': 'Test task', 'categories': 'Test category'})

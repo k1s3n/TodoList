@@ -1,5 +1,5 @@
 #ändra TESTING=true i katalogen ".env"
 
-#kolla in modified länken när du kör frontend
+#Det finns ett script "run_test.bat" skriv "& .\run_tests.bat" i terminalen ifall du inte orkar ändra i katalgoen ./env manuellt
 
 
